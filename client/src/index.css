@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+button:has(.lucide-sun):hover .lucide-sun {
+  fill: #C5C5C6;
+  color: #C5C5C6;
+}
+
+button:has(.lucide-moon):hover .lucide-moon {
+  fill: #434343;
+  color: #434343;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

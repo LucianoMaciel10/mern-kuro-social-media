@@ -1,0 +1,90 @@
+import { BadgeCheck, Heart, MessageCircle, Share2 } from "lucide-react";
+import moment from "moment";
+import { useTheme } from "next-themes";
+import { useState } from "react";
+import { dummyUserData } from "../assets/assets";
+
+const PostCard = ({ post }) => {
+  const { theme } = useTheme();
+  const [likes, setLikes] = useState(post.likes_count);
+  const currentUser = dummyUserData;
+
+  const postWithHashtags = post.content.replace(
+    /(#\w+)/g,
+    `<span class="${
+      theme === "dark" ? "text-blue-500" : "text-blue-600"
+    }">$1</span>`
+  );
+
+  const handleLike = async () => {};
+
+  return (
+    <div
+      className={`rounded-xl shadow p-4 space-y-4 w-full ${
+        theme === "dark"
+          ? "bg-neutral-900 shadow-md shadow-neutral-800"
+          : "bg-white"
+      }`}
+    >
+      <div className="inline-flex items-center gap-3">
+        <img
+          src={post.user.profile_picture}
+          className="w-10 h-10 rounded-full shadow cursor-pointer"
+        />
+        <div>
+          <div className="flex items-center space-x-1">
+            <span className="cursor-pointer">{post.user.full_name}</span>
+            <BadgeCheck className="w-4 h-4 text-blue-500" />
+          </div>
+          <div className="text-gray-500 text-sm">
+            @{post.user.username} • {moment(post.createdAt).fromNow()}
+          </div>
+        </div>
+      </div>
+      {post.content && (
+        <div
+          className={`${
+            theme === "dark" ? "text-neutral-200" : "text-gray-800"
+          } text-sm whitespace-pre-line`}
+          dangerouslySetInnerHTML={{ __html: postWithHashtags }}
+        />
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        {post.image_urls.map((image, index) => (
+          <img
+            src={image}
+            key={index}
+            className={`w-full h-48 object-cover rounded-lg ${
+              post.image_urls.length === 1 && "col-span-2 h-auto"
+            }`}
+          />
+        ))}
+      </div>
+      <div
+        className={`flex items-center gap-4 text-sm pt-2 border-t ${
+          theme === "dark" ? "border-neutral-600 text-neutral-400" : "border-neutral-300 text-neutral-600"
+        }`}
+      >
+        <div className="flex items-center gap-1">
+          <Heart
+            onClick={handleLike}
+            className={`w-5 h-5 cursor-pointer ${
+              likes.includes(currentUser._id) && "text-red-500 fill-red-500"
+            }`}
+          />
+          <span>{likes.length}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <MessageCircle className="w-5 h-5 cursor-pointer" />
+          <span>{12}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Share2 className="w-5 h-5 cursor-pointer" />
+          <span>{7}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PostCard;
