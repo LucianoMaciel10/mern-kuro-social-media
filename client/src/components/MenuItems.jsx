@@ -2,16 +2,18 @@
 import { NavLink } from "react-router-dom";
 import { menuItemsData } from "../assets/assets";
 import { useTheme } from "next-themes";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
-const MenuItems = ({ mediaQuery1279 }) => {
+const MenuItems = ({ flex, selectItemDark, unselectItemsDark, selectItemLight, unselectItemsLight }) => {
+  const mediaQuery1279 = useMediaQuery(1279);
   const { theme } = useTheme();
 
   return (
     <div
       className={`${
         mediaQuery1279
-          ? "px-6 text-gray-600 space-y-1 font-medium"
-          : "flex flex-col gap-3"
+          ? "px-6 text-gray-600 space-y-2 font-medium"
+          : `flex gap-3 ${flex}`
       }`}
     >
       {menuItemsData.map(({ to, label, Icon }) => (
@@ -20,16 +22,16 @@ const MenuItems = ({ mediaQuery1279 }) => {
           to={to}
           end={to === "/"}
           className={({ isActive }) =>
-            `px-3.5 py-3 flex items-center rounded-xl 
+            `flex items-center rounded-xl transition-all
             ${mediaQuery1279 && "gap-3"}
             ${
               isActive && theme === "dark"
-                ? "bg-gray-800 text-blue-500"
+                ? `${selectItemDark}`
                 : isActive && theme !== "dark"
-                ? "bg-gray-200 text-blue-700"
-                : !isActive && theme === "dark"
-                ? "hover:bg-gray-800 text-gray-500"
-                : !isActive && theme !== "dark" && "hover:bg-gray-200"
+                  ? `${selectItemLight}` // bg-gray-200 text-blue-700
+                  : !isActive && theme === "dark"
+                    ? `${unselectItemsDark}`
+                    : !isActive && theme !== "dark" && `${unselectItemsLight}`
             }`
           }
         >

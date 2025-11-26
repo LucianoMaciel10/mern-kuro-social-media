@@ -54,7 +54,13 @@ const Sidebar = () => {
             theme === "dark" ? "border-gray-700" : "border-gray-200"
           } mb-8`}
         />
-        <MenuItems mediaQuery1279={mediaQuery1279} />
+        <MenuItems
+          flex={"flex-col"}
+          selectItemDark={"bg-gray-800 text-blue-500 p-3"}
+          selectItemLight={"bg-neutral-200 text-blue-500 p-3"}
+          unselectItemsDark={"hover:bg-neutral-800 text-neutral-500 p-3"}
+          unselectItemsLight={"hover:bg-neutral-200 text-neutral-500 p-3"}
+        />
         <Link
           to={"/create-post"}
           className={`flex items-center justify-center gap-2 mt-6 mx-6 bg-linear-to-r  active:scale-95 transition cursor-pointer text-white ${
@@ -136,7 +142,6 @@ const Sidebar = () => {
               appearance={{
                 theme: theme === "dark" ? dark : undefined,
                 elements: {
-                  userButtonPopoverActionButton__signOut: { display: "none" },
                   avatarBox: {
                     width: "35px",
                     height: "35px",
