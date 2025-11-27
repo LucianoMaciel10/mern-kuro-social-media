@@ -1,9 +1,9 @@
 import { UserButton, useClerk } from "@clerk/clerk-react";
 import { useTheme } from "next-themes";
 import { assets, dummyUserData } from "../assets/assets";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MenuItems from "./MenuItems";
-import { CirclePlus, LogOut, Moon, Sun } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 import { dark } from "@clerk/themes";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 
@@ -12,7 +12,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const user = dummyUserData;
   const { signOut } = useClerk();
-  const mediaQuery1279 = useMediaQuery(1279);
+  const mediaQuery1280 = useMediaQuery(1280);
 
   return (
     <div
@@ -26,17 +26,17 @@ const Sidebar = () => {
       flex flex-col justify-between items-center max-sm:absolute top-0 bottom-0 z-20 
       translate-x-0 max-sm:-translate-x-full
       transition-transform duration-300 ease-in-out
-      ${mediaQuery1279 ? "w-60" : "w-15"}
+      ${mediaQuery1280 ? "w-60" : "w-15"}
       `}
     >
       <div
         className={`${
-          mediaQuery1279
+          mediaQuery1280
             ? "w-full"
             : "py-4 flex flex-col justify-center items-center"
         }`}
       >
-        {mediaQuery1279 ? (
+        {mediaQuery1280 ? (
           <img
             onClick={() => navigate("/")}
             src={theme === "dark" ? assets.logoL : assets.logoD}
@@ -61,36 +61,17 @@ const Sidebar = () => {
           unselectItemsDark={"hover:bg-neutral-800 text-neutral-500 p-3"}
           unselectItemsLight={"hover:bg-neutral-200 text-neutral-500 p-3"}
         />
-        <Link
-          to={"/create-post"}
-          className={`flex items-center justify-center gap-2 mt-6 mx-6 bg-linear-to-r  active:scale-95 transition cursor-pointer text-white ${
-            theme === "dark"
-              ? "from-blue-500 to-blue-900 hover:from-blue-400 hover:to-blue-800"
-              : "from-sky-300 to-blue-500 hover:from-sky-400 hover:to-blue-600"
-          } 
-          ${mediaQuery1279 ? "py-2.5 rounded-lg" : "rounded-full p-1"}
-          `}
-        >
-          {mediaQuery1279 ? (
-            <>
-              <CirclePlus className="w-5 h-5" />
-              Create Post
-            </>
-          ) : (
-            <CirclePlus className="w-7 h-7" />
-          )}
-        </Link>
       </div>
       <div
         className={`border-t w-full flex
         ${theme === "dark" ? "border-gray-700" : "border-gray-200"} 
         ${
-          mediaQuery1279
+          mediaQuery1280
             ? "p-4 px-7 items-center justify-between"
             : "justify-center py-3"
         }`}
       >
-        {mediaQuery1279 ? (
+        {mediaQuery1280 ? (
           <>
             <div className="flex gap-2 items-center">
               <UserButton

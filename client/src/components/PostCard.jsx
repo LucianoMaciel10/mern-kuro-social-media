@@ -3,8 +3,10 @@ import moment from "moment";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { dummyUserData } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 
 const PostCard = ({ post }) => {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.likes_count);
   const currentUser = dummyUserData;
@@ -28,12 +30,18 @@ const PostCard = ({ post }) => {
     >
       <div className="inline-flex items-center gap-3">
         <img
+          onClick={() => navigate(`/profile/${post.user._id}`)}
           src={post.user.profile_picture}
           className="w-10 h-10 rounded-full shadow cursor-pointer"
         />
         <div>
           <div className="flex items-center space-x-1">
-            <span className="cursor-pointer">{post.user.full_name}</span>
+            <span
+              onClick={() => navigate(`/profile/${post.user._id}`)}
+              className="cursor-pointer"
+            >
+              {post.user.full_name}
+            </span>
             <BadgeCheck className="w-4 h-4 text-blue-500" />
           </div>
           <div className="text-gray-500 text-sm">
@@ -62,7 +70,9 @@ const PostCard = ({ post }) => {
       </div>
       <div
         className={`flex items-center gap-4 text-sm pt-2 border-t ${
-          theme === "dark" ? "border-neutral-600 text-neutral-400" : "border-neutral-300 text-neutral-600"
+          theme === "dark"
+            ? "border-neutral-600 text-neutral-400"
+            : "border-neutral-300 text-neutral-600"
         }`}
       >
         <div className="flex items-center gap-1">

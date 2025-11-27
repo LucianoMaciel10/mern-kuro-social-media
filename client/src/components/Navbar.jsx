@@ -6,18 +6,18 @@ const Navbar = () => {
 
   return (
     <div
-      className={`fixed left-1/2 border backdrop-blur-md flex items-center -translate-x-1/2 rounded-full bottom-5 w-[90vw] h-15 ${
+      className={`fixed left-1/2 border-2 backdrop-blur-md flex items-center -translate-x-1/2 rounded-full bottom-5 w-[90vw] h-15 ${
         theme === "dark"
-          ? "bg-neutral-500/20 border-neutral-300"
-          : "bg-neutral-200/20 border-neutral-800"
+          ? "bg-neutral-500/30 border-neutral-300"
+          : "bg-neutral-200/30 border-neutral-700"
       }`}
     >
       <MenuItems
-        flex={"flex-row w-full justify-around items-center"}
-        selectItemDark={"backdrop-blur-md bg-blue-700/30 text-blue-600 px-3.5 py-3"}
-        selectItemLight={"backdrop-blur-md bg-blue-700/30 text-blue-600 px-3.5 py-3"}
-        unselectItemsLight={"text-neutral-400"}
-        unselectItemsDark={"text-neutral-400"}
+        flex={"flex-row w-full justify-evenly items-center"}
+        selectItemDark={"backdrop-blur-md bg-blue-700/40 text-blue-500 px-[3.5vw] py-[1.5vh]"}
+        selectItemLight={"backdrop-blur-md bg-blue-700/40 text-blue-500 px-[3.5vw] py-[1.5vh]"}
+        unselectItemsDark={"text-neutral-300"}
+        unselectItemsLight={"text-neutral-700"}
       />
     </div>
   );

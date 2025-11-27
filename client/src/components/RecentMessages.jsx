@@ -9,7 +9,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery.jsx";
 const RecentMessages = () => {
   const { theme } = useTheme();
   const [messages, setMessages] = useState([]);
-  const is1100to1279 = useMediaQuery(1100, 1279); // 1100px - 1279px
+  const is1100to1280 = useMediaQuery(1100, 1280); // 1100px - 1280px
   const isAbove1330 = useMediaQuery(1330); // >= 1330px
 
   const fetchRecentMessages = async () => {
@@ -51,7 +51,7 @@ const RecentMessages = () => {
             <div className="w-full">
               <div
                 className={`flex ${
-                  is1100to1279 || isAbove1330
+                  is1100to1280 || isAbove1330
                     ? "justify-between gap-2"
                     : "flex-col"
                 }`}

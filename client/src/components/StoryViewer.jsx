@@ -2,6 +2,7 @@
 import { BadgeCheck, Pause, X, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 
 const StoryViewer = ({ viewStory, setViewStory }) => {
   const [isPaused, setIsPaused] = useState(false);
@@ -11,6 +12,7 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
   const animationFrameRef = useRef(null);
   const elapsedTimeRef = useRef(0); // Tiempo transcurrido real
   const lastTimeRef = useRef(null); // Último timestamp
+  const navigate = useNavigate();
 
   const togglePause = () => {
     setIsPaused(!isPaused);
@@ -22,11 +24,11 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 
   useEffect(() => {
     // Desactivar scroll del body
-    document.body.style.overflow = 'hidden';
-    
+    document.body.style.overflow = "hidden";
+
     // Limpiar al desmontar
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, []);
 
@@ -143,17 +145,13 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
   const renderContent = () => {
     switch (viewStory.media_type) {
       case "image":
-        return (
-          <img
-            src={viewStory.media_url}
-            alt="Story"
-          />
-        );
+        return <img src={viewStory.media_url} alt="Story" />;
       case "video":
         return (
           <video
             ref={videoRef}
             autoPlay
+            className="-z-10"
             onEnded={() => setViewStory(false)}
             src={viewStory.media_url}
           ></video>
@@ -170,8 +168,8 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
   };
 
   return createPortal(
-    <div 
-      style={{ pointerEvents: 'auto' }}
+    <div
+      style={{ pointerEvents: "auto" }}
       className="fixed inset-0 backdrop-blur bg-black/80 z-100"
       onClick={() => setViewStory(false)}
     >
@@ -199,15 +197,25 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
         {/* Header usuario */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className="cursor-auto absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-3 sm:px-8 backdrop-blur-2xl rounded-lg bg-black/10"
+          className={`cursor-auto absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-3 sm:px-8 backdrop-blur-2xl rounded-lg ${
+            viewStory.media_type === "video" || viewStory.media_type === "image"
+              ? "bg-white/10"
+              : "bg-black/10"
+          }`}
         >
           <img
+            onClick={() => navigate(`/profile/${viewStory.user._id}`)}
             src={viewStory.user?.profile_picture}
             alt={viewStory.user?.full_name}
-            className="size-7 sm:size-8 rounded-full object-cover border border-white"
+            className="cursor-pointer size-7 sm:size-8 rounded-full object-cover border border-white"
           />
           <div className="relative text-white font-medium flex items-center gap-1.5">
-            <span>{viewStory.user?.full_name}</span>
+            <span
+              className="cursor-pointer"
+              onClick={() => navigate(`/profile/${viewStory.user._id}`)}
+            >
+              {viewStory.user?.full_name}
+            </span>
             <BadgeCheck size={18} />
             {/* Indicador de pausa */}
             {isPaused && (

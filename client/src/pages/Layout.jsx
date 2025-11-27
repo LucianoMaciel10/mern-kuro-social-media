@@ -16,9 +16,11 @@ const Layout = () => {
       {mediaQuery640 && <Sidebar />}
 
       <div
-        className={`flex-1 ${
-          theme === "dark" ? "bg-neutral-950" : "bg-neutral-100"
-        }`}
+        className={`flex-1 overflow-y-auto
+          ${theme === "dark" ? "bg-neutral-950" : "bg-neutral-100"}`}
+        style={{
+          maxHeight: "100vh",
+        }}
       >
         <Outlet />
       </div>
