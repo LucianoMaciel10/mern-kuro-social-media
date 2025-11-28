@@ -1,9 +1,56 @@
-
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { dummyPostsData, dummyUserData } from "../assets/assets";
+import { useTheme } from "next-themes";
+import Loading from "../components/Loading";
+import { UserProfile } from "@clerk/clerk-react";
+import UserProfileInfo from "../components/UserProfileInfo";
 
 const Profile = () => {
-  return (
-    <div>Profile</div>
-  )
-}
+  const { theme } = useTheme();
+  const { profileId } = useParams();
+  const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [activeTab, setActiveTab] = useState("posts");
+  const [showEdit, setShowEdit] = useState(false);
 
-export default Profile
+  const fetchUser = async () => {
+    setUser(dummyUserData);
+    setPosts(dummyPostsData);
+  };
+
+  useEffect(() => {
+    (() => {
+      fetchUser();
+    })();
+  }, []);
+
+  return user ? (
+    <div className="relative h-full overflow-y-scroll p-6">
+      <div className="max-w-3xl mx-auto">
+        <div
+          className={`rounded-2xl shadow overflow-hidden ${
+            theme === "dark"
+              ? "bg-neutral-900 border-neutral-700 shadow-md shadow-neutral-800"
+              : "border-neutral-400/60 bg-neutral-50"
+          }`}
+        >
+          <div
+            className={`h-40 md:h-56 bg-linear-to-l ${
+              theme === "dark" 
+                ? "from-neutral-950/10 to-blue-900" 
+                : "from-sky-300/60 to-sky-600"
+            }`}
+          >
+            {user.cover_photo && <img src={user.cover_photo} className="w-full h-full object-cover" />}
+          </div>
+          <UserProfileInfo posts={posts} user={user} profileId={profileId} setShowEdit={setShowEdit} />
+        </div>
+      </div>
+    </div>
+  ) : (
+    <Loading />
+  );
+};
+
+export default Profile;

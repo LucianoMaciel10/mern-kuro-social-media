@@ -30,7 +30,7 @@ const Feed = () => {
   return !loading ? (
     <div
       className={`h-full overflow-y-scroll no-scrollbar xl:pr-5 flex items-start justify-center 2xl:gap-8 ${
-        !mediaQuery640 ? "pb-26 pt-5" : "py-10"
+        !mediaQuery640 ? "pb-27 pt-5" : "py-10"
       }`}
     >
       <div className="px-4 w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-4xl">

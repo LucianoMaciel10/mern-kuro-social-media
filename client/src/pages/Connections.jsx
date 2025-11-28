@@ -1,17 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import {
-  dummyConnectionsData as connections,
   dummyFollowingData as following,
   dummyFollowersData as followers,
   dummyPendingConnectionsData as pendingConnections,
+  dummyUserData,
 } from "../assets/assets";
-import {
-  MessageSquare,
-  UserCheck,
-  UserPlus,
-  UserRoundPen,
-  Users,
-} from "lucide-react";
+import { UserCheck, UserRoundPen, Users } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -19,19 +13,19 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 const Connections = () => {
   const [currentTab, setCurrentTab] = useState("Followers");
   const { theme } = useTheme();
+  const currentUser = dummyUserData;
   const navigate = useNavigate();
-  const mediaQuery392 = useMediaQuery(392);
   const mediaQuery640 = useMediaQuery(640);
+  const mediaQuery1280 = useMediaQuery(1280);
 
   const dataArray = [
     { label: "Followers", value: followers, icon: Users },
     { label: "Following", value: following, icon: UserCheck },
     { label: "Pending", value: pendingConnections, icon: UserRoundPen },
-    { label: "Connections", value: connections, icon: UserPlus },
   ];
 
   return (
-    <div className={`min-h-screen`}>
+    <div className={`min-h-screen ${!mediaQuery1280 && "flex justify-center"}`}>
       <div className={`max-w-6xl mx-auto p-6`}>
         <div className="mb-8">
           <h1
@@ -57,7 +51,7 @@ const Connections = () => {
         >
           {dataArray.map((item, index) => (
             <div
-              className={`flex flex-col items-center justify-center rounded-md gap-1 border h-20 w-40 border-gray-200 ${
+              className={`flex flex-col shadow items-center justify-center rounded-md gap-1 border h-20 w-40 border-gray-200 ${
                 theme === "dark"
                   ? "bg-neutral-900 shadow-md shadow-neutral-800"
                   : "bg-white"
@@ -71,17 +65,32 @@ const Connections = () => {
         </div>
 
         <div
-          className={`inline-flex flex-wrap items-center border rounded-md p-1
-            ${!mediaQuery640 && "w-full justify-center"} ${
+          className={`inline-flex shadow relative flex-wrap items-center border rounded-md p-1
+            ${!mediaQuery640 && "w-full justify-center z-0"} ${
             theme === "dark"
               ? "bg-neutral-900 shadow-md shadow-neutral-800"
               : "bg-white"
           }`}
         >
+          <div
+            className={`absolute h-7 top-1/2 transition-all -translate-y-1/2 rounded-md z-10 ${
+              currentTab === "Followers" 
+                ? "left-2 w-25" 
+                : currentTab === 'Following'
+                  ? 'left-28 w-26'
+                  : 'left-55 w-23'
+            }
+            ${
+              theme === 'dark' 
+                ? 'bg-neutral-700/50'
+                : 'bg-neutral-200/50'
+            }
+            `}
+          ></div>
           {dataArray.map((tab) => (
             <button
               onClick={() => setCurrentTab(tab.label)}
-              className={`cursor-pointer flex items-center px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors ${
                 currentTab === tab.label
                   ? theme === "dark"
                     ? "text-neutral-50 font-medium"
@@ -104,92 +113,119 @@ const Connections = () => {
         </div>
 
         <div
-          className={`flex flex-wrap gap-6 mt-6 ${!mediaQuery640 && "pb-21 justify-center"}`}
+          className={`flex flex-wrap gap-6 mt-6 ${
+            !mediaQuery640 && "pb-21 justify-center"
+          }`}
         >
           {dataArray
             .find((item) => item.label === currentTab)
             .value.map((user) => (
               <div
                 key={user._id}
-                className={`w-fit flex gap-5 p-6 rounded-md ${
+                className={`w-fit flex gap-5 p-6 rounded-md shadow ${
                   theme === "dark"
                     ? "bg-neutral-900 shadow-md shadow-neutral-800"
                     : "bg-white"
                 }`}
               >
-                <img
-                  src={user.profile_picture}
-                  className="rounded-full w-12 h-12 shadow-md mx-auto"
-                />
                 <div className="flex-1">
-                  <p
-                    className={`font-medium ${
-                      theme === "dark" ? "text-neutral-100" : "text-neutral-700"
-                    }`}
-                  >
-                    {user.full_name}
-                  </p>
-                  <p
-                    className={`${
-                      theme === "dark" ? "text-neutral-400" : "text-neutral-500"
-                    }`}
-                  >
-                    @{user.username}
-                  </p>
-                  <p
-                    className={`text-sm ${
-                      theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                    }`}
-                  >
-                    {user.bio.slice(0, 30)}...
-                  </p>
+                  <div className="flex gap-3">
+                    <img
+                      src={user.profile_picture}
+                      onClick={() => navigate(`/messages/${user._id}`)}
+                      className="rounded-full w-12 h-12 shadow-md mx-auto cursor-pointer"
+                    />
+                    <div>
+                      <p
+                        onClick={() => navigate(`/messages/${user._id}`)}
+                        className={`font-medium cursor-pointer w-fit ${
+                          theme === "dark"
+                            ? "text-neutral-100"
+                            : "text-neutral-700"
+                        }`}
+                      >
+                        {user.full_name}
+                      </p>
+                      <p
+                        className={`${
+                          theme === "dark"
+                            ? "text-neutral-400"
+                            : "text-neutral-500"
+                        }`}
+                      >
+                        @{user.username}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          theme === "dark"
+                            ? "text-neutral-500"
+                            : "text-neutral-400"
+                        }`}
+                      >
+                        {user.bio.slice(0, 30)}...
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex max-sm:flex-col gap-2 mt-4">
-                    {
-                      <button
-                        onClick={() => navigate(`/profile/${user._id}`)}
-                        className={`w-full p-2 text-sm rounded active:scale-95 transition text-white cursor-pointer ${
-                          theme === "dark"
-                            ? " bg-sky-600/60 hover:bg-sky-700"
-                            : "bg-sky-500/60  hover:bg-sky-500/80"
-                        }`}
-                      >
-                        View Profile
-                      </button>
-                    }
-                    {currentTab === "Following" && (
-                      <button
-                        className={`w-full text-white p-2 text-sm rounded active:scale-95 transition cursor-pointer ${
-                          theme === "dark"
-                            ? "bg-red-800/50 hover:bg-red-800/80"
-                            : "bg-red-300/60 hover:bg-red-300/80"
-                        }`}
-                      >
-                        Unfollow
-                      </button>
-                    )}
-                    {currentTab === "Pending" && (
-                      <button
-                        className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer ${
-                          theme === "dark"
-                            ? "bg-green-900/60 hover:bg-green-900"
-                            : "bg-green-600/40 hover:bg-green-600/60"
-                        }`}
-                      >
-                        Accept
-                      </button>
-                    )}
-                    {currentTab === "Connections" && (
+                    {(currentTab === "Followers" ||
+                      currentTab === "Following") && (
                       <button
                         onClick={() => navigate(`/messages/${user._id}`)}
-                        className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer flex items-center justify-center gap-1 ${
+                        className={`w-full  text-white text-sm rounded active:scale-95 transition cursor-pointer flex items-center justify-center gap-1 p-2 ${
                           theme === "dark"
                             ? "bg-sky-900/50 hover:bg-sky-900"
                             : "bg-sky-600/40 hover:bg-sky-600/60"
                         }`}
                       >
-                        <MessageSquare className="w-5 h-5" />
                         Message
                       </button>
+                    )}
+                    {currentTab === "Following" && (
+                      <>
+                        {currentUser.followers.includes(user._id) ? (
+                          <button
+                            className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer ${
+                              theme === "dark"
+                                ? "bg-red-800/50 hover:bg-red-800/80"
+                                : "bg-red-300/60 hover:bg-red-300/80"
+                            }`}
+                          >
+                            Unfollow
+                          </button>
+                        ) : (
+                          <button
+                            className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer ${
+                              theme === "dark"
+                                ? "bg-blue-800/50 hover:bg-blue-800/80"
+                                : "bg-blue-300/60 hover:bg-blue-300/80"
+                            }`}
+                          >
+                            Follow
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {currentTab === "Pending" && (
+                      <>
+                        <button
+                          className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer ${
+                            theme === "dark"
+                              ? "bg-green-900/60 hover:bg-green-900"
+                              : "bg-green-600/40 hover:bg-green-600/60"
+                          }`}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className={`w-full p-2 text-white text-sm rounded active:scale-95 transition cursor-pointer ${
+                            theme === "dark"
+                              ? "bg-red-800/50 hover:bg-red-800/80"
+                              : "bg-red-300/60 hover:bg-red-300/80"
+                          }`}
+                        >
+                          Reject
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
