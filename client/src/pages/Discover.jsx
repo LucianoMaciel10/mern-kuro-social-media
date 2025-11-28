@@ -11,8 +11,8 @@ const Discover = () => {
   const [input, setInput] = useState("");
   const [users, setUsers] = useState(dummyConnectionsData);
   const [loading, setLoading] = useState(false);
-  const mediaQuery1280 = useMediaQuery(768,1280);
-  const mediaQuery708 = useMediaQuery(708)
+  const mediaQuery1536 = useMediaQuery(1536);
+  const mediaQuery768 = useMediaQuery(768);
 
   const handleSearch = (e) => {
     if (e.key === "Enter") {
@@ -27,13 +27,13 @@ const Discover = () => {
 
   return (
     <div
-      className={`min-h-screen bg-linear-to-b ${
+      className={`h-full bg-linear-to-b overflow-y-scroll no-scrollbar ${
         theme === "dark"
           ? "from-neutral-800 to-black"
           : "from-neutral-100 to-neutral-300"
-      } ${mediaQuery1280 && "flex justify-center"}`}
+      } relative flex justify-center`}
     >
-      <div className="max-w-6xl mx-auto p-6 pb-26">
+      <div className="w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl p-6">
         <div className="mb-8">
           <h1
             className={`text-3xl font-bold mb-2 mt-3 ${
@@ -52,7 +52,7 @@ const Discover = () => {
         </div>
 
         <div
-          className={`mb-8 shadow-md rounded-md border md:w-165 ${
+          className={`mb-8 shadow-md rounded-md border ${
             theme === "dark"
               ? "bg-neutral-900 shadow-neutral-800 border-neutral-600"
               : "border-neutral-300 bg-white"
@@ -73,15 +73,21 @@ const Discover = () => {
           </div>
         </div>
 
-        <div className={`flex flex-wrap gap-6 ${!mediaQuery708 && 'justify-center'}`}>
+        <div
+          className={`grid gap-y-6 justify-items-center ${
+            mediaQuery1536
+              ? "grid-cols-3"
+              : !mediaQuery768
+                ? "grid-cols-1"
+                : "grid-cols-2"
+          }  pb-27 sm:pb-6`}
+        >
           {users.map((user) => (
             <UserCard user={user} key={user._id} />
           ))}
         </div>
 
-        {
-          loading && <Loading height="60vh" />
-        }
+        {loading && <Loading height="60vh" />}
       </div>
     </div>
   );

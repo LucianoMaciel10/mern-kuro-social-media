@@ -1,9 +1,12 @@
 import { Calendar, MapPin, PenBox, Verified } from "lucide-react";
 import { useTheme } from "next-themes";
 import moment from "moment";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
   const { theme } = useTheme();
+  const mediaQuery521 = useMediaQuery(521);
+  const mediaQuery377 = useMediaQuery(377);
 
   return (
     <div
@@ -13,21 +16,27 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
           : "bg-white"
       }`}
     >
-      <div className="flex flex-col md:flex-row items-start gap-6">
+      <div className="flex items-start gap-6">
         <div
-          className={`w-32 h-32 border-4 shadow-lg absolute -top-16 rounded-full ${
-            theme === "dark" ? "border-neutral-700" : "border-white"
-          }`}
+          className={`
+            w-32 h-32 border-4 shadow-lg absolute rounded-full
+            ${
+              mediaQuery521
+                ? "-top-16 left-8"
+                : "-top-44 left-1/2 -translate-x-1/2"
+            }
+            ${theme === "dark" ? "border-neutral-700" : "border-white"}
+          `}
         >
           <img
             src={user.profile_picture}
-            className="absolute rounded-full z-2"
+            className={`absolute rounded-full z-2`}
           />
         </div>
-        <div className="w-full pt-16 md:pt-0 md:pl-36">
-          <div className="flex flex-col md:flex-row items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3">
+        <div className="w-full">
+          <div className={`flex justify-between ${mediaQuery377 ? 'items-center' : 'flex-col gap-2'}`}>
+            <div className={`${mediaQuery521 ? "pl-36" : "pl-0"}`}>
+              <div className="flex items-center gap-2">
                 <h1
                   className={`text-2xl font-bold ${
                     theme === "dark" ? "text-neutral-200" : "text-neutral-900"
@@ -48,7 +57,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
             {!profileId && (
               <button
                 onClick={() => setShowEdit(true)}
-                className={`flex items-center gap-2 border px-4 rounded-lg font-medium transition-all mt-4 md:mt-0 cursor-pointer active:scale-95 ${
+                className={`flex items-center gap-2 border px-4 rounded-lg font-medium transition-all cursor-pointer active:scale-95 w-fit ${
                   theme === "dark"
                     ? "border-neutral-700 bg-neutral-900 hover:bg-neutral-800/80"
                     : "border-neutral-300 bg-neutral-50 hover:bg-neutral-200/50"
@@ -60,7 +69,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
             )}
           </div>
           <p
-            className={`text-sm max-w-md mt-4 ${
+            className={`text-sm max-w-md mt-2 ${
               theme === "dark" ? "text-neutral-400/80" : "text-neutral-500"
             }`}
           >

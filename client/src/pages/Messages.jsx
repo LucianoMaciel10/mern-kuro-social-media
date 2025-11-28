@@ -7,16 +7,13 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 const Messages = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const mediaQuery1280 = useMediaQuery(1280);
   const mediaQuery640 = useMediaQuery(640);
 
   return (
     <div
-      className={`min-h-screen relative ${
-        !mediaQuery1280 && "flex justify-center"
-      }`}
+      className={`min-h-screen relative flex justify-center`}
     >
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl p-6 mb-21">
         <div className="mb-8">
           <h1
             className={`text-3xl font-bold mb-2 mt-3 ${
@@ -34,10 +31,10 @@ const Messages = () => {
           </p>
         </div>
 
-        <div className={`flex flex-col gap-5 ${!mediaQuery640 && 'pb-21'}`}>
+        <div className={`flex flex-col gap-5`}>
           {dummyConnectionsData.map((user) => (
             <div
-              className={`max-w-xl flex gap-5 p-6 shadow rounded-md ${
+              className={` flex gap-5 p-6 shadow rounded-md ${
                 theme === "dark"
                   ? "bg-neutral-900 shadow-md shadow-neutral-800"
                   : "bg-white"

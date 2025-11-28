@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { dummyPostsData, dummyUserData } from "../assets/assets";
 import { useTheme } from "next-themes";
 import Loading from "../components/Loading";
-import { UserProfile } from "@clerk/clerk-react";
 import UserProfileInfo from "../components/UserProfileInfo";
 
 const Profile = () => {
@@ -26,8 +25,8 @@ const Profile = () => {
   }, []);
 
   return user ? (
-    <div className="relative h-full overflow-y-scroll p-6">
-      <div className="max-w-3xl mx-auto">
+    <div className={`min-h-screen relative flex justify-center pt-6`}>
+      <div className="w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl p-6 mb-20">
         <div
           className={`rounded-2xl shadow overflow-hidden ${
             theme === "dark"
@@ -36,7 +35,7 @@ const Profile = () => {
           }`}
         >
           <div
-            className={`h-40 md:h-56 bg-linear-to-l ${
+            className={`h-56 bg-linear-to-l ${
               theme === "dark" 
                 ? "from-neutral-950/10 to-blue-900" 
                 : "from-sky-300/60 to-sky-600"

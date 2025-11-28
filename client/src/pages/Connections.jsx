@@ -16,7 +16,6 @@ const Connections = () => {
   const currentUser = dummyUserData;
   const navigate = useNavigate();
   const mediaQuery640 = useMediaQuery(640);
-  const mediaQuery1280 = useMediaQuery(1280);
 
   const dataArray = [
     { label: "Followers", value: followers, icon: Users },
@@ -25,8 +24,8 @@ const Connections = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${!mediaQuery1280 && "flex justify-center"}`}>
-      <div className={`max-w-6xl mx-auto p-6`}>
+    <div className={`min-h-screen relative flex justify-center`}>
+      <div className={`w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl p-6`}>
         <div className="mb-8">
           <h1
             className={`text-3xl font-bold mb-2 mt-3 ${
@@ -64,57 +63,55 @@ const Connections = () => {
           ))}
         </div>
 
-        <div
-          className={`inline-flex shadow relative flex-wrap items-center border rounded-md p-1
-            ${!mediaQuery640 && "w-full justify-center z-0"} ${
-            theme === "dark"
-              ? "bg-neutral-900 shadow-md shadow-neutral-800"
-              : "bg-white"
-          }`}
-        >
+        <div className={`flex ${!mediaQuery640 && 'justify-center'}`}>
           <div
-            className={`absolute h-7 top-1/2 transition-all -translate-y-1/2 rounded-md z-10 ${
-              currentTab === "Followers" 
-                ? "left-2 w-25" 
-                : currentTab === 'Following'
-                  ? 'left-28 w-26'
-                  : 'left-55 w-23'
-            }
+            className={`inline-flex shadow relative flex-wrap items-center border rounded-md p-1
             ${
-              theme === 'dark' 
-                ? 'bg-neutral-700/50'
-                : 'bg-neutral-200/50'
-            }
+              theme === "dark"
+                ? "bg-neutral-900 shadow-md shadow-neutral-800"
+                : "bg-white"
+            }`}
+          >
+            <div
+              className={`absolute h-7 top-1/2 transition-all -translate-y-1/2 rounded-md z-10 ${
+                currentTab === "Followers"
+                  ? "left-2 w-25"
+                  : currentTab === "Following"
+                  ? "left-28 w-26"
+                  : "left-55 w-23"
+              }
+            ${theme === "dark" ? "bg-neutral-700/50" : "bg-neutral-200/50"}
             `}
-          ></div>
-          {dataArray.map((tab) => (
-            <button
-              onClick={() => setCurrentTab(tab.label)}
-              className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors ${
-                currentTab === tab.label
-                  ? theme === "dark"
-                    ? "text-neutral-50 font-medium"
-                    : "text-neutral-900 font-medium"
-                  : theme === "dark"
-                  ? "text-neutral-500 hover:text-neutral-400"
-                  : "text-neutral-500 hover:text-neutral-800"
-              }`}
-              key={tab.label}
-            >
-              <tab.icon className="w-5 h-5" />
-              <span className="ml-1">{tab.label}</span>
-              {tab.count !== undefined && (
-                <span className="ml-2 text-xs px-2 py-0.5 rounded-full">
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
+            ></div>
+            {dataArray.map((tab) => (
+              <button
+                onClick={() => setCurrentTab(tab.label)}
+                className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors ${
+                  currentTab === tab.label
+                    ? theme === "dark"
+                      ? "text-neutral-50 font-medium"
+                      : "text-neutral-900 font-medium"
+                    : theme === "dark"
+                    ? "text-neutral-500 hover:text-neutral-400"
+                    : "text-neutral-500 hover:text-neutral-800"
+                }`}
+                key={tab.label}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span className="ml-1">{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className="ml-2 text-xs px-2 py-0.5 rounded-full">
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div
-          className={`flex flex-wrap gap-6 mt-6 ${
-            !mediaQuery640 && "pb-21 justify-center"
+          className={`flex flex-wrap gap-6 mt-6 pb-21 sm:pb-0 ${
+            !mediaQuery640 && "justify-center"
           }`}
         >
           {dataArray
