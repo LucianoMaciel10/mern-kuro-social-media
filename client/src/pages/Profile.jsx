@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { dummyPostsData, dummyUserData } from "../assets/assets";
 import { useTheme } from "next-themes";
 import Loading from "../components/Loading";
 import UserProfileInfo from "../components/UserProfileInfo";
+import PostCard from "../components/PostCard";
+import moment from "moment";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 const Profile = () => {
   const { theme } = useTheme();
@@ -12,6 +15,9 @@ const Profile = () => {
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [showEdit, setShowEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const mediaQuery1536 = useMediaQuery(1536);
+  const mediaQuery768 = useMediaQuery(768);
 
   const fetchUser = async () => {
     setUser(dummyUserData);
@@ -25,8 +31,10 @@ const Profile = () => {
   }, []);
 
   return user ? (
-    <div className={`min-h-screen relative flex justify-center pt-6`}>
-      <div className="w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl p-6 mb-20">
+    <div
+      className={`h-full overflow-y-scroll no-scrollbar relative flex justify-center pt-6`}
+    >
+      <div className="w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-5xl px-6">
         <div
           className={`rounded-2xl shadow overflow-hidden ${
             theme === "dark"
@@ -36,14 +44,104 @@ const Profile = () => {
         >
           <div
             className={`h-56 bg-linear-to-l ${
-              theme === "dark" 
-                ? "from-neutral-950/10 to-blue-900" 
+              theme === "dark"
+                ? "from-neutral-950/10 to-blue-900"
                 : "from-sky-300/60 to-sky-600"
             }`}
           >
-            {user.cover_photo && <img src={user.cover_photo} className="w-full h-full object-cover" />}
+            {user.cover_photo && (
+              <img
+                src={user.cover_photo}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
-          <UserProfileInfo posts={posts} user={user} profileId={profileId} setShowEdit={setShowEdit} />
+          <UserProfileInfo
+            posts={posts}
+            user={user}
+            profileId={profileId}
+            setShowEdit={setShowEdit}
+          />
+        </div>
+
+        <div className="mt-6">
+          <div
+            className={`rounded-xl shadow p-1 flex max-w-md mx-auto ${
+              theme === "dark"
+                ? "bg-neutral-900 shadow-md shadow-neutral-800"
+                : "bg-white"
+            }`}
+          >
+            {["posts", "media", "likes"].map((tab) => (
+              <button
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                  activeTab === tab
+                    ? theme === "dark"
+                      ? "bg-blue-600"
+                      : "bg-sky-400"
+                    : theme === "dark"
+                    ? "text-neutral-500 hover:text-neutral-400"
+                    : "text-neutral-400 hover:text-neutral-600"
+                }`}
+                key={tab}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "posts" && (
+            <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
+              {posts.map((post) => (
+                <PostCard post={post} key={post._id} />
+              ))}
+            </div>
+          )}
+
+          {activeTab === "media" && (
+            <div className="pb-27 sm:pb-6 flex justify-center">
+              <div
+                className={`w-fit grid gap-6 justify-items-center p-6 mt-6 rounded-lg shadow ${
+                  mediaQuery1536
+                    ? "grid-cols-3"
+                    : !mediaQuery768
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
+                }
+                ${
+                  theme === "dark"
+                    ? "bg-neutral-900 shadow-neutral-800"
+                    : "bg-white"
+                }
+              `}
+              >
+                {posts
+                  .filter((post) => post.image_urls.length > 0)
+                  .map((post) => (
+                    <>
+                      {post.image_urls.map((image, index) => (
+                        <div
+                          key={index}
+                          className={`w-64 relative group rounded-lg cursor-pointer overflow-hidden shadow-md hover:shadow-lg ${
+                            theme === "dark" && "shadow-neutral-800"
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            key={index}
+                            className=" aspect-video object-cover"
+                          />
+                          <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
+                            Posted {moment(post.createdAt).fromNow()}
+                          </p>
+                        </div>
+                      ))}
+                    </>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

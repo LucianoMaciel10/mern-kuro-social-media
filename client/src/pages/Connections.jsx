@@ -72,28 +72,17 @@ const Connections = () => {
                 : "bg-white"
             }`}
           >
-            <div
-              className={`absolute h-7 top-1/2 transition-all -translate-y-1/2 rounded-md z-10 ${
-                currentTab === "Followers"
-                  ? "left-2 w-25"
-                  : currentTab === "Following"
-                  ? "left-28 w-26"
-                  : "left-55 w-23"
-              }
-            ${theme === "dark" ? "bg-neutral-700/50" : "bg-neutral-200/50"}
-            `}
-            ></div>
             {dataArray.map((tab) => (
               <button
                 onClick={() => setCurrentTab(tab.label)}
                 className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors ${
                   currentTab === tab.label
                     ? theme === "dark"
-                      ? "text-neutral-50 font-medium"
-                      : "text-neutral-900 font-medium"
+                      ? "text-neutral-50 font-medium bg-neutral-700/60"
+                      : "text-neutral-900 font-medium bg-neutral-200/50"
                     : theme === "dark"
-                    ? "text-neutral-500 hover:text-neutral-400"
-                    : "text-neutral-500 hover:text-neutral-800"
+                      ? "text-neutral-500 hover:text-neutral-400"
+                      : "text-neutral-500 hover:text-neutral-800"
                 }`}
                 key={tab.label}
               >

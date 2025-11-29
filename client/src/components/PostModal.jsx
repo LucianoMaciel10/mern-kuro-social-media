@@ -1,0 +1,96 @@
+import { useTheme } from "next-themes";
+import PostCard from "./PostCard";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import moment from "moment";
+import HeartComponent from "./HeartComponent";
+import { X } from "lucide-react";
+
+const PostModal = ({ post, setShowModal }) => {
+  const { theme } = useTheme();
+  const mediaQuery640 = useMediaQuery(640);
+  const mediaQuery1750 = useMediaQuery(1750)
+
+  return (
+    <div
+      onClick={() => setShowModal(false)}
+      className={`fixed flex-col inset-0 z-110 min-h-screen bg-black/80 backdrop-blur flex items-center justify-center px-6 sm:px-30 md:px-48 lg:px-70 xl:px-100 2xl:px-130 ${mediaQuery1750 && 'px-160!'}`}
+    >
+      <div className="max-h-[70vh] relative overflow-y-scroll no-scrollbar rounded-lg">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowModal(false);
+          }}
+          className="absolute top-3 right-3 text-3xl font-bold focus:outline-none z-50"
+        >
+          <X className="w-8 h-8 hover:scale-110 transition cursor-pointer" />
+        </button>
+        {mediaQuery640 && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`rounded-lg rounded-b-none ${
+              theme === "dark"
+                ? "bg-neutral-900 shadow-md shadow-neutral-800"
+                : "bg-white"
+            }`}
+          >
+            <PostCard withShadow={false} post={post} />
+          </div>
+        )}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`p-3 flex flex-col gap-2 ${
+            theme === "dark"
+              ? "bg-neutral-900 shadow-md shadow-neutral-800"
+              : "bg-white"
+          }`}
+        >
+          {!mediaQuery640 && post.content && (
+            <div className="border-b-neutral-400 border-b-2 pb-2 flex flex-col gap-1">
+              <div className="flex gap-2 items-center">
+                <img
+                  src={post.user.profile_picture}
+                  className="w-10 rounded-full cursor-pointer"
+                />
+                <p className="font-semibold cursor-pointer">
+                  {post.user.username}
+                </p>
+                <p className="text-xs">{moment(post.createdAt).fromNow()}</p>
+              </div>
+              <p>{post.content}</p>
+            </div>
+          )}
+          {post.comments.map((comment) => (
+            <div
+              key={comment._id}
+              className="flex flex-col gap-1 bg-neutral-100 rounded-lg p-2"
+            >
+              <div className="flex gap-2 items-center">
+                <img
+                  src={comment.user.profile_picture}
+                  className="w-10 rounded-full cursor-pointer"
+                />
+                <p className="font-semibold cursor-pointer">
+                  {comment.user.username}
+                </p>
+                <p className="text-xs text-neutral-600">
+                  {moment(comment.createdAt).fromNow()}
+                </p>
+              </div>
+              <p>{comment.message}</p>
+              <div className="flex gap-4 items-center">
+                <span className="font-medium cursor-pointer">Reply</span>
+                <HeartComponent
+                  currentUser={comment.user}
+                  likes={post.likes_count}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PostModal;

@@ -29,9 +29,7 @@ const Feed = () => {
 
   return !loading ? (
     <div
-      className={`h-full overflow-y-scroll no-scrollbar xl:pr-5 flex items-start justify-center 2xl:gap-8 ${
-        !mediaQuery640 ? "pb-27 pt-6" : "pb-6 pt-12"
-      }`}
+      className={`h-full overflow-y-scroll no-scrollbar xl:pr-5 flex items-start justify-center 2xl:gap-8 pb-27 pt-6 sm:pb-6 sm:pt-12`}
     >
       <div className="px-6 w-screen sm:w-lg md:w-2xl lg:w-3xl 2xl:w-4xl">
         {!mediaQuery640 && (
@@ -75,7 +73,7 @@ const Feed = () => {
         <StoriesBar />
         <div className="space-y-6">
           {feeds.map((post) => (
-            <PostCard key={post._id} post={post} />
+            <PostCard key={post._id} post={post} withShadow={true} />
           ))}
         </div>
       </div>

@@ -98,7 +98,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
             </span>
           </div>
 
-          <div className="flex items-center gap-6 mt-6 border-t border-neutral-200 pt-2">
+          <div className={`flex items-center gap-6 mt-6 border-t pt-2 ${theme === 'dark' ? 'border-neutral-700' : 'border-neutral-200'}`}>
             <div>
               <span
                 className={`sm:text-xl font-bold ${

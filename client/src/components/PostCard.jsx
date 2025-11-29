@@ -1,15 +1,18 @@
-import { BadgeCheck, Heart, MessageCircle, Share2 } from "lucide-react";
+import { BadgeCheck, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { dummyUserData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import PostModal from "./PostModal";
+import HeartComponent from "./HeartComponent";
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, withShadow }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.likes_count);
   const currentUser = dummyUserData;
+  const [showModal, setShowModal] = useState(false)
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -18,15 +21,15 @@ const PostCard = ({ post }) => {
     }">$1</span>`
   );
 
-  const handleLike = async () => {};
-
   return (
     <div
-      className={`rounded-xl shadow p-4 space-y-4 w-full ${
+      className={`rounded-xl p-4 space-y-4 w-full ${
         theme === "dark"
           ? "bg-neutral-900 shadow-md shadow-neutral-800"
           : "bg-white"
-      }`}
+      }
+      ${withShadow && 'shadow'}
+    `}
     >
       <div className="inline-flex items-center gap-3">
         <img
@@ -76,16 +79,11 @@ const PostCard = ({ post }) => {
         }`}
       >
         <div className="flex items-center gap-1">
-          <Heart
-            onClick={handleLike}
-            className={`w-5 h-5 cursor-pointer ${
-              likes.includes(currentUser._id) && "text-red-500 fill-red-500"
-            }`}
-          />
+          <HeartComponent currentUser={currentUser} likes={likes} />
           <span>{likes.length}</span>
         </div>
         <div className="flex items-center gap-1">
-          <MessageCircle className="w-5 h-5 cursor-pointer" />
+          <MessageCircle onClick={() => setShowModal(true)} className="w-5 h-5 cursor-pointer" />
           <span>{12}</span>
         </div>
         <div className="flex items-center gap-1">
@@ -93,6 +91,7 @@ const PostCard = ({ post }) => {
           <span>{7}</span>
         </div>
       </div>
+      {showModal && <PostModal post={post} setShowModal={setShowModal} />}
     </div>
   );
 };
