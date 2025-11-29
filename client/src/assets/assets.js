@@ -21,7 +21,7 @@ export const assets = {
 
 export const menuItemsData = [
   { to: "/", label: "Feed", Icon: Home },
-  { to: "/comments", label: "comments", Icon: MessageCircle },
+  { to: "/messages", label: "Messages", Icon: MessageCircle },
   { to: "/connections", label: "Connections", Icon: Users },
   { to: "/discover", label: "Discover", Icon: Search },
   { to: "/profile", label: "Profile", Icon: UserIcon },
@@ -40,6 +40,7 @@ export const dummyUserData = {
   following: ["user_2", "user_3"],
   connections: ["user_2", "user_3"],
   posts: [],
+  posts_liked: ["68773e977db16954a783839c", "686e3e47ba0cf0fecba19947"],
   is_verified: true,
   createdAt: "2025-07-09T09:26:59.231Z",
   updatedAt: "2025-07-21T06:56:50.017Z",
@@ -142,7 +143,7 @@ export const dummyPostsData = [
       "https://images.pexels.com/photos/1595385/pexels-photo-1595385.jpeg",
     ],
     post_type: "text_with_image",
-    likes_count: [],
+    users_who_liked: [],
     comments: [
       {
         _id: "85685876436345754534",
@@ -215,7 +216,7 @@ export const dummyPostsData = [
           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, deserunt.",
         createdAt: "2025-07-25T08:13:18.111Z",
         updatedAt: "2025-07-25T08:13:18.111Z",
-      }
+      },
     ],
     createdAt: "2025-07-09T13:22:12.601Z",
     updatedAt: "2025-07-09T13:22:12.601Z",
@@ -227,7 +228,7 @@ export const dummyPostsData = [
       "Unlock your potential—every small step counts. Stay consistent, stay focused, and trust the process. Growth takes time, but every day is a new chance to be better than yesterday. 🌱✨\r\n\r\n#Motivation #GrowthMindset #DailyInspiration #StayFocused #LevelUp #PositiveVibes #KeepGoing #SelfImprovement #MindsetMatters #SuccessJourney",
     image_urls: [],
     post_type: "text",
-    likes_count: [],
+    users_who_liked: [],
     comments: [
       {
         _id: "4324234234745742342",
@@ -264,7 +265,7 @@ export const dummyPostsData = [
       "This is a sample paragraph with some #hashtags like #socialmedia and #marketing. Let's find them!",
     image_urls: [],
     post_type: "text",
-    likes_count: [],
+    users_who_liked: [],
     comments: [
       {
         _id: "673463758745532434",
@@ -302,7 +303,7 @@ export const dummyPostsData = [
       "https://images.pexels.com/photos/1619317/pexels-photo-1619317.jpeg",
     ],
     post_type: "image",
-    likes_count: ["user_2zdJbcAqiOX9jq2DIueBRQn0lMt"],
+    users_who_liked: ["user_2zdJbcAqiOX9jq2DIueBRQn0lMt"],
     comments: [
       {
         _id: "345747453423423434534",
@@ -340,7 +341,7 @@ export const dummyPostsData = [
       "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg",
     ],
     post_type: "text_with_image",
-    likes_count: [],
+    users_who_liked: [],
     comments: [
       {
         _id: "36457655634587684",
@@ -376,7 +377,7 @@ export const dummyPostsData = [
     content: "Hello, Everyone this is my first Post",
     image_urls: [],
     post_type: "text",
-    likes_count: [],
+    users_who_liked: [],
     comments: [
       {
         _id: "3646374578345724352534",

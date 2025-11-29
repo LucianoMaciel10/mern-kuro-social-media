@@ -1,7 +1,7 @@
 import { BadgeCheck, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { dummyUserData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
@@ -10,10 +10,9 @@ import HeartComponent from "./HeartComponent";
 const PostCard = ({ post, withShadow, noReRender = false }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [likes, setLikes] = useState(post.likes_count);
+  const [likes, setLikes] = useState(post.users_who_liked);
   const currentUser = dummyUserData;
-  const [showModal, setShowModal] = useState(false)
-  const commentRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -26,10 +25,10 @@ const PostCard = ({ post, withShadow, noReRender = false }) => {
     <div
       className={`rounded-xl p-4 space-y-4 w-full ${
         theme === "dark"
-          ? `bg-neutral-900 shadow-neutral-800 ${withShadow && 'shadow-md'}`
+          ? `bg-neutral-900 shadow-neutral-800 ${withShadow && "shadow-md"}`
           : "bg-white"
       }
-      ${withShadow && 'shadow'}
+      ${withShadow && "shadow"}
     `}
     >
       <div className="inline-flex items-center gap-3">
@@ -83,8 +82,14 @@ const PostCard = ({ post, withShadow, noReRender = false }) => {
           <HeartComponent currentUser={currentUser} likes={likes} />
           <span>{likes.length}</span>
         </div>
-        <div onClick={() => document.getElementById('input-post-comment').focus()} className="flex items-center gap-1">
-          <MessageCircle onClick={() => !noReRender && setShowModal(true)} className="w-5 h-5 cursor-pointer" />
+        <div
+          onClick={() => document.getElementById("input-post-comment").focus()}
+          className="flex items-center gap-1"
+        >
+          <MessageCircle
+            onClick={() => !noReRender && setShowModal(true)}
+            className="w-5 h-5 cursor-pointer"
+          />
           <span>{12}</span>
         </div>
         <div className="flex items-center gap-1">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, Sparkle, TextIcon, Upload } from "lucide-react";
 import { useTheme } from "next-themes";
 import toast from "react-hot-toast";

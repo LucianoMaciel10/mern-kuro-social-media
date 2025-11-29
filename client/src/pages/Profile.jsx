@@ -121,7 +121,9 @@ const Profile = () => {
                   .map((post) => (
                     <>
                       {post.image_urls.map((image, index) => (
-                        <div
+                        <Link
+                          to={image}
+                          target="_blank"
                           key={index}
                           className={`w-64 relative group rounded-lg cursor-pointer overflow-hidden shadow-md hover:shadow-lg ${
                             theme === "dark" && "shadow-neutral-800"
@@ -135,13 +137,16 @@ const Profile = () => {
                           <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
                             Posted {moment(post.createdAt).fromNow()}
                           </p>
-                        </div>
+                        </Link>
                       ))}
                     </>
                   ))}
               </div>
             </div>
           )}
+          {/* {activeTab === "likes" && (
+            Buscar entre todos los posts, los que tengan los ID que aparecen en la propiedad user.posts_liked y mostrarlos
+          )} */}
         </div>
       </div>
     </div>

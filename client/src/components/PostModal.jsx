@@ -135,7 +135,7 @@ const PostModal = ({ post, setShowModal }) => {
                 <span className="font-medium cursor-pointer">Reply</span>
                 <HeartComponent
                   currentUser={comment.user}
-                  likes={post.likes_count}
+                  likes={post.users_who_liked}
                 />
               </div>
             </div>

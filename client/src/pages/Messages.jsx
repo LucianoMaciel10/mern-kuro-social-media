@@ -2,12 +2,10 @@ import { useTheme } from "next-themes";
 import { dummyConnectionsData } from "../assets/assets";
 import { Eye, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useMediaQuery } from "../hooks/useMediaQuery";
 
 const Messages = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const mediaQuery640 = useMediaQuery(640);
 
   return (
     <div

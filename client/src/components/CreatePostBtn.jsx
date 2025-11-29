@@ -10,7 +10,7 @@ const CreatePostBtn = () => {
   return (
     <Link
       to={"/create-post"}
-      className={`flex items-center justify-center gap-2 bg-linear-to-r  active:scale-95 transition cursor-pointer text-white ${
+      className={`flex items-center justify-center gap-2 bg-linear-to-r active:scale-95 transition cursor-pointer text-white ${
         theme === "dark"
           ? "from-blue-500 to-blue-900 hover:from-blue-400 hover:to-blue-800"
           : "from-sky-300 to-blue-500 hover:from-sky-400 hover:to-blue-600"
