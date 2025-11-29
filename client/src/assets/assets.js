@@ -396,7 +396,7 @@ export const dummyPostsData = [
       },
       {
         _id: "3646374754474574352534",
-        dummyUser3Data,
+        user: dummyUser3Data,
         message:
           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, deserunt.",
         createdAt: "2025-07-25T08:13:18.111Z",

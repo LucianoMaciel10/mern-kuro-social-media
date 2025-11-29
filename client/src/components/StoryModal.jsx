@@ -30,16 +30,6 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
     }
   };
 
-  useEffect(() => {
-    // Desactivar scroll del body
-    document.body.style.overflow = "hidden";
-
-    // Limpiar al desmontar
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
-
   const handleCreateStory = async () => {};
 
   return createPortal(

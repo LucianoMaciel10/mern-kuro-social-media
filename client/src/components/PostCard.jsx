@@ -1,18 +1,19 @@
 import { BadgeCheck, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { dummyUserData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
 
-const PostCard = ({ post, withShadow }) => {
+const PostCard = ({ post, withShadow, noReRender = false }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.likes_count);
   const currentUser = dummyUserData;
   const [showModal, setShowModal] = useState(false)
+  const commentRef = useRef(null);
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -25,7 +26,7 @@ const PostCard = ({ post, withShadow }) => {
     <div
       className={`rounded-xl p-4 space-y-4 w-full ${
         theme === "dark"
-          ? "bg-neutral-900 shadow-md shadow-neutral-800"
+          ? `bg-neutral-900 shadow-neutral-800 ${withShadow && 'shadow-md'}`
           : "bg-white"
       }
       ${withShadow && 'shadow'}
@@ -82,8 +83,8 @@ const PostCard = ({ post, withShadow }) => {
           <HeartComponent currentUser={currentUser} likes={likes} />
           <span>{likes.length}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <MessageCircle onClick={() => setShowModal(true)} className="w-5 h-5 cursor-pointer" />
+        <div onClick={() => document.getElementById('input-post-comment').focus()} className="flex items-center gap-1">
+          <MessageCircle onClick={() => !noReRender && setShowModal(true)} className="w-5 h-5 cursor-pointer" />
           <span>{12}</span>
         </div>
         <div className="flex items-center gap-1">
