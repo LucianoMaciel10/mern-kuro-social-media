@@ -445,7 +445,7 @@ export const dummyRecentMessagesData = [
   },
 ];
 
-export const dummycommentsData = [
+export const dummyMessagesData = [
   {
     _id: "6878cc3217a54e4d37480122",
     from_user_id: "user_2zwZSCMRXQ9GaEEVLgm6akQo96i",

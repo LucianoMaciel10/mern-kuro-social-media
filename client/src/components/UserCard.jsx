@@ -10,10 +10,6 @@ const UserCard = ({ user }) => {
 
   const handleFollow = async () => {};
 
-  const handlePendingMessage = async () => {};
-
-  const handleMessage = async () => {};
-
   return (
     <div
       className={`p-4 pt-6 flex flex-col justify-between w-72 hover:shadow-lg border shadow rounded-md ${
@@ -115,16 +111,12 @@ const UserCard = ({ user }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (currentUser.followers.includes(user._id)) {
-              handleMessage();
-            } else {
-              handlePendingMessage();
-            }
+            navigate(`/messages/${user._id}`)
           }}
           className={`flex items-center p-2 rounded-full justify-center border-2 group cursor-pointer active:scale-95 transition  ${
             theme === "dark"
-              ? "text-neutral-400 border-neutral-500/40 bg-neutral-500/50 hover:bg-neutral-500/65"
-              : "text-neutral-600/60 border-neutral-500/30 bg-neutral-300/90 hover:bg-neutral-400/50"
+              ? "text-neutral-500 border-neutral-500/40 bg-neutral-500/50 hover:bg-neutral-500/65"
+              : "text-neutral-500/60 border-neutral-500/30 bg-neutral-300/90 hover:bg-neutral-400/50"
           }`}
         >
           <MessageCircle className="w-5 h-5 group-hover:scale-105 transition" />

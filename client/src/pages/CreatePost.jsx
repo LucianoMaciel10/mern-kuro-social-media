@@ -79,7 +79,7 @@ const CreatePost = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-3 border-t border-neutral-300">
+          <div className={`flex items-center justify-between pt-3 border-t ${theme === 'dark' ? 'border-neutral-500' : 'border-neutral-300'}`}>
             <label
               htmlFor="images"
               className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 transition cursor-pointer"

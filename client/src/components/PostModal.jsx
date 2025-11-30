@@ -7,6 +7,7 @@ import { SendHorizonal, X } from "lucide-react";
 
 const PostModal = ({ post, setShowModal }) => {
   const { theme } = useTheme();
+  const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
   const mediaQuery1750 = useMediaQuery(1750);
 
@@ -67,10 +68,12 @@ const PostModal = ({ post, setShowModal }) => {
                   src={post.user.profile_picture}
                   className="w-10 rounded-full cursor-pointer"
                 />
-                <p className="font-semibold cursor-pointer">
-                  {post.user.username}
-                </p>
-                <p className="text-xs">{moment(post.createdAt).fromNow()}</p>
+                <div className={`flex ${!mediaQuery330 ? 'flex-col' : 'items-center gap-2'}`}>
+                  <p className="font-semibold cursor-pointer">
+                    {post.user.username}
+                  </p>
+                  <p className="text-xs">{moment(post.createdAt).fromNow()}</p>
+                </div>
               </div>
               <div
                 className={`${

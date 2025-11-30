@@ -7,6 +7,7 @@ import UserProfileInfo from "../components/UserProfileInfo";
 import PostCard from "../components/PostCard";
 import moment from "moment";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import ProfileModal from "../components/ProfileModal";
 
 const Profile = () => {
   const { theme } = useTheme();
@@ -149,6 +150,7 @@ const Profile = () => {
           )} */}
         </div>
       </div>
+      {showEdit && <ProfileModal setShowEdit={setShowEdit} />}
     </div>
   ) : (
     <Loading />
