@@ -88,7 +88,7 @@ export const updateUserData = async (req, res) => {
     if (req.files?.profile) {
       const profile = req.files.profile[0];
       try {
-        const buffer = await fs.readFile(profile.path);
+        const buffer = profile.buffer;
         const response = await imagekit.upload({
           file: buffer,
           fileName: `profile-${userId}-${Date.now()}`,
@@ -119,7 +119,7 @@ export const updateUserData = async (req, res) => {
     if (req.files?.cover) {
       const cover = req.files.cover[0];
       try {
-        const buffer = await fs.readFile(cover.path);
+        const buffer = cover.buffer;
         const response = await imagekit.upload({
           file: buffer,
           fileName: `cover-${userId}-${Date.now()}`,

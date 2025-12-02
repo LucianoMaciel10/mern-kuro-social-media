@@ -1,26 +1,8 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
 
-// Crear carpeta de uploads si no existe
-const uploadDir = "uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configuración de almacenamiento
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Nombre único: timestamp + nombre original
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext);
-    cb(null, name + "-" + uniqueSuffix + ext);
-  },
-});
+// Usar memory storage en lugar de disk storage
+const storage = multer.memoryStorage();
 
 // Filtro de archivos (solo imágenes)
 const fileFilter = (req, file, cb) => {
@@ -39,7 +21,7 @@ const fileFilter = (req, file, cb) => {
 
 // Configuración de multer
 export const upload = multer({
-  storage,
+  storage, // ✅ memory storage, no disk
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB máximo
