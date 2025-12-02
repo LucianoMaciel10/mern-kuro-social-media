@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil, X } from "lucide-react";
 
 const ProfileModal = ({ setShowEdit }) => {
+  const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
   const user = dummyUserData;
   const [editForm, setEditForm] = useState({
@@ -30,7 +31,9 @@ const ProfileModal = ({ setShowEdit }) => {
       >
         <div
           className={`${
-            theme === "dark" ? "bg-neutral-900 shadow-neutral-800 shadow-md" : "bg-white shadow"
+            theme === "dark"
+              ? "bg-neutral-900 shadow-neutral-800 shadow-md"
+              : "bg-white shadow"
           } relative rounded-lg shadow p-6 h-[90vh] overflow-y-scroll no-scrollbar text-center`}
         >
           <button
@@ -230,6 +233,61 @@ const ProfileModal = ({ setShowEdit }) => {
                 }`}
                 placeholder="Enter a short biography about you"
               />
+            </div>
+            <div className="flex flex-col gap-3 w-full items-center">
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="toggle-privacy"
+                  className={`text-sm font-medium ${
+                    theme === "dark" ? "text-neutral-200" : "text-neutral-700"
+                  }`}
+                >
+                  Privacy Setting
+                </label>
+                <select
+                  id="toggle-privacy"
+                  value={isPrivate ? "private" : "public"}
+                  onChange={(e) => setIsPrivate(e.target.value === "private")}
+                  className={`px-4 py-2 border rounded-lg cursor-pointer ${
+                    theme === "dark"
+                      ? "border-neutral-600"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  <option
+                    className={`${theme === "dark" && "bg-neutral-800"}`}
+                    value="public"
+                  >
+                    🌍 Public
+                  </option>
+                  <option
+                    className={`${theme === "dark" && "bg-neutral-800"}`}
+                    value="private"
+                  >
+                    🔒 Private
+                  </option>
+                </select>
+              </div>
+
+              <p
+                className={`text-sm p-3 rounded-lg border w-[90%] ${
+                  theme === "dark"
+                    ? "border-blue-600 text-neutral-200 bg-blue-500/70"
+                    : "border-blue-200 text-gray-600 bg-blue-50"
+                }`}
+              >
+                {isPrivate ? (
+                  <>
+                    <strong>Private Account:</strong> Follow requests will
+                    require your approval
+                  </>
+                ) : (
+                  <>
+                    <strong>Public Account:</strong> Anyone can follow you
+                    without approval
+                  </>
+                )}
+              </p>
             </div>
             <div className="flex justify-evenly pt-2">
               <button

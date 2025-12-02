@@ -33,6 +33,7 @@ const syncUserCreation = inngest.createFunction(
       full_name,
       profile_picture: image_url,
       username,
+      isPrivate: false,
     };
 
     await User.create(userData);

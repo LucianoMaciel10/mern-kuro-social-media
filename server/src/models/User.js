@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema(
     followers: [{ type: String, ref: "User" }],
     following: [{ type: String, ref: "User" }],
     isVerified: { type: Boolean, default: false },
+    isPrivate: { type: Boolean, default: false },
   },
   { timestamps: true, minimize: false }
 );
