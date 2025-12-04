@@ -47,7 +47,14 @@ const Messages = () => {
               theme === "dark" ? "text-neutral-50" : "text-neutral-900"
             }`}
           >
-            Inbox
+            Inbox{" "}
+            <span
+              className={`ml-2 font-medium text-2xl px-2 rounded-md text-white ${
+                theme === "dark" ? "bg-blue-500" : "bg-sky-500"
+              }`}
+            >
+              {inbox.length}
+            </span>
           </h1>
           <p
             className={`${
@@ -130,7 +137,14 @@ const Messages = () => {
               theme === "dark" ? "text-neutral-50" : "text-neutral-900"
             }`}
           >
-            Pending
+            Pending{" "}
+            <span
+              className={`ml-2 font-medium text-2xl px-2 rounded-md text-white ${
+                theme === "dark" ? "bg-blue-500" : "bg-sky-500"
+              }`}
+            >
+              {pending.length}
+            </span>
           </h1>
           <p
             className={`${

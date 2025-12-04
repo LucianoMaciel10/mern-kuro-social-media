@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema(
     location: { type: String, default: "" },
     followers: [{ type: String, ref: "User" }],
     following: [{ type: String, ref: "User" }],
+    followRequests: [{ type: String, ref: "User" }],
     isVerified: { type: Boolean, default: false },
     isPrivate: { type: Boolean, default: false },
   },

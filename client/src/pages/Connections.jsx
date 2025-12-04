@@ -1,27 +1,69 @@
 import { useNavigate } from "react-router-dom";
-import {
-  dummyFollowingData as following,
-  dummyFollowersData as followers,
-  dummyPendingConnectionsData as pendingConnections,
-  dummyUserData,
-} from "../assets/assets";
-import { UserCheck, UserRoundPen, Users } from "lucide-react";
+import { UserCheck, UserPlus, Users } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const Connections = () => {
   const [currentTab, setCurrentTab] = useState("Followers");
+  const [currentUser, setCurrentUser] = useState({});
+  const { getToken } = useAuth();
   const { theme } = useTheme();
-  const currentUser = dummyUserData;
   const navigate = useNavigate();
   const mediaQuery640 = useMediaQuery(640);
+  const [tabsData, setTabsData] = useState([
+    { label: "Followers", value: [] },
+    { label: "Following", value: [] },
+    { label: "Pending", value: [] },
+  ]);
 
-  const dataArray = [
-    { label: "Followers", value: followers, icon: Users },
-    { label: "Following", value: following, icon: UserCheck },
-    { label: "Pending", value: pendingConnections, icon: UserRoundPen },
-  ];
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await getToken();
+        const res = await axios.get(`${API_URL}/api/user/data`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrentUser(res.data.user);
+        setTabsData((prevTabs) =>
+          prevTabs.map((tab) => {
+            switch (tab.label) {
+              case "Followers":
+                return { ...tab, value: res.data.user.followers || [] };
+              case "Following":
+                return { ...tab, value: res.data.user.following || [] };
+              case "Pending":
+                return { ...tab, value: res.data.user.followRequests || [] };
+              default:
+                return tab;
+            }
+          })
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchUserData();
+  }, [getToken]);
+
+  const stats = tabsData.map((tab) => {
+    const iconMap = {
+      Followers: Users,
+      Following: UserCheck,
+      Pending: UserPlus,
+    };
+
+    return {
+      count: tab.value.length,
+      label: tab.label,
+      icon: iconMap[tab.label],
+    };
+  });
 
   return (
     <div className={`min-h-screen relative flex justify-center`}>
@@ -48,7 +90,7 @@ const Connections = () => {
             !mediaQuery640 && "justify-center"
           }`}
         >
-          {dataArray.map((item, index) => (
+          {stats.map((item, index) => (
             <div
               className={`flex flex-col shadow items-center justify-center rounded-md gap-1 border h-20 w-40 border-gray-200 ${
                 theme === "dark"
@@ -57,13 +99,13 @@ const Connections = () => {
               }`}
               key={index}
             >
-              <b>{item.value.length}</b>
+              <b>{item.count}</b>
               <p>{item.label}</p>
             </div>
           ))}
         </div>
 
-        <div className={`flex ${!mediaQuery640 && 'justify-center'}`}>
+        <div className={`flex ${!mediaQuery640 && "justify-center"}`}>
           <div
             className={`inline-flex shadow relative flex-wrap items-center border rounded-md p-1
             ${
@@ -72,29 +114,29 @@ const Connections = () => {
                 : "bg-white"
             }`}
           >
-            {dataArray.map((tab) => (
-              <button
-                onClick={() => setCurrentTab(tab.label)}
-                className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors ${
-                  currentTab === tab.label
+            {stats.map((item) =>
+              item.label === "Pending" && currentUser.isPrivate ? (
+                ""
+              ) : (
+                <button
+                  onClick={() => setCurrentTab(item.label)}
+                  className={`cursor-pointer flex items-center z-20 px-3 py-1 text-sm rounded-md transition-colors 
+                ${
+                  currentTab === item.label
                     ? theme === "dark"
                       ? "text-neutral-50 font-medium bg-neutral-700/60"
                       : "text-neutral-900 font-medium bg-neutral-200/50"
                     : theme === "dark"
-                      ? "text-neutral-500 hover:text-neutral-400"
-                      : "text-neutral-500 hover:text-neutral-800"
+                    ? "text-neutral-500 hover:text-neutral-400"
+                    : "text-neutral-500 hover:text-neutral-800"
                 }`}
-                key={tab.label}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span className="ml-1">{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span className="ml-2 text-xs px-2 py-0.5 rounded-full">
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
+                  key={item.label}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="ml-1">{item.label}</span>
+                </button>
+              )
+            )}
           </div>
         </div>
 
@@ -103,7 +145,7 @@ const Connections = () => {
             !mediaQuery640 && "justify-center"
           }`}
         >
-          {dataArray
+          {tabsData
             .find((item) => item.label === currentTab)
             .value.map((user) => (
               <div

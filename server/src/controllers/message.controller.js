@@ -109,8 +109,6 @@ export const getConversations = async (req, res) => {
       data: {
         inbox,
         pending,
-        inboxCount: inbox.length,
-        pendingCount: pending.length,
       },
     });
   } catch (error) {
