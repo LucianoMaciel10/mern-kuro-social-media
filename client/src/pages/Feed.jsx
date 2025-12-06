@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { assets, dummyPostsData } from "../assets/assets";
+import { assets } from "../assets/assets";
 import Loading from "../components/Loading";
 import StoriesBar from "../components/StoriesBar";
 import PostCard from "../components/PostCard";
@@ -7,25 +7,50 @@ import { useTheme } from "next-themes";
 import RecentMessages from "../components/RecentMessages";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { dark } from "@clerk/themes";
-import { UserButton } from "@clerk/clerk-react";
+import { useAuth, UserButton } from "@clerk/clerk-react";
 import { Moon, Sun } from "lucide-react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const Feed = () => {
+  const { getToken } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [feeds, setFeeds] = useState(dummyPostsData);
+  const [feeds, setFeeds] = useState();
   const [loading, setLoading] = useState(true);
   const mediaQuery640 = useMediaQuery(640);
-
-  const fetchFeeds = async () => {
-    setFeeds(dummyPostsData);
-  };
+  const [currentUser, setCurrentUser] = useState({});
 
   useEffect(() => {
-    (() => {
-      fetchFeeds();
-      setLoading(false);
-    })();
-  }, []);
+    const fetchUserData = async () => {
+      try {
+        const token = await getToken();
+        const res = await axios.get(`${API_URL}/api/user/data`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrentUser(res.data.user);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const fetchFeeds = async () => {
+      try {
+        const token = await getToken();
+        const res = await axios.get(`${API_URL}/api/posts/feed`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFeeds(res.data.posts);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+    fetchFeeds();
+  }, [getToken]);
 
   return !loading ? (
     <div
@@ -73,7 +98,7 @@ const Feed = () => {
         <StoriesBar />
         <div className="space-y-6">
           {feeds.map((post) => (
-            <PostCard key={post._id} post={post} withShadow={true} />
+            <PostCard key={post._id} currentUser={currentUser} post={post} withShadow={true} />
           ))}
         </div>
       </div>

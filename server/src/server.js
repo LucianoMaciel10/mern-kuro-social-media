@@ -7,6 +7,8 @@ import { inngest, functions } from "./inngest/index.js";
 import { clerkMiddleware } from "@clerk/express";
 import userRouter from "./routes/user.routes.js";
 import messageRouter from "./routes/message.routes.js";
+import postRouter from "./routes/post.routes.js";
+import commentRouter from "./routes/comment.routes.js";
 
 dotenv.config();
 
@@ -21,6 +23,8 @@ app.get("/", (req, res) => res.send("Server is running!"));
 app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/user", userRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/posts", postRouter);
+app.use("/api/comments", commentRouter);
 
 connectDB().then(() =>
   app.listen(PORT, () => console.log("Server is running on port " + PORT))

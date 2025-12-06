@@ -2,14 +2,23 @@ import { useTheme } from "next-themes";
 import PostCard from "./PostCard";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import moment from "moment";
-import HeartComponent from "./HeartComponent";
 import { SendHorizonal, X } from "lucide-react";
+import Comment from "./Comment";
+import { useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const PostModal = ({ post, setShowModal }) => {
+  const [comments, setComments] = useState(post.comments || []);
+  const [isLoadingComment, setIsLoadingComment] = useState(false);
+  const [comment, setComment] = useState();
   const { theme } = useTheme();
   const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
   const mediaQuery1750 = useMediaQuery(1750);
+  const { getToken } = useAuth();
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -17,6 +26,28 @@ const PostModal = ({ post, setShowModal }) => {
       theme === "dark" ? "text-blue-500" : "text-blue-600"
     }">$1</span>`
   );
+
+  const handleSendComment = async (comment, postId) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        `${API_URL}/api/comments/create`,
+        { content: comment.trim(), postId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (data.success) {
+        setComments([data.data, ...comments]);
+        setComment("");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingComment(false);
+    }
+  };
 
   return (
     <div
@@ -68,7 +99,11 @@ const PostModal = ({ post, setShowModal }) => {
                   src={post.user.profile_picture}
                   className="w-10 rounded-full cursor-pointer"
                 />
-                <div className={`flex ${!mediaQuery330 ? 'flex-col' : 'items-center gap-2'}`}>
+                <div
+                  className={`flex ${
+                    !mediaQuery330 ? "flex-col" : "items-center gap-2"
+                  }`}
+                >
                   <p className="font-semibold cursor-pointer">
                     {post.user.username}
                   </p>
@@ -91,13 +126,17 @@ const PostModal = ({ post, setShowModal }) => {
             <input
               id="input-post-comment"
               type="text"
+              onChange={(e) => setComment(e.target.value)}
+              value={comment}
               className={`rounded-full border outline-none w-full px-4 py-1 ${
                 theme === "dark" ? "border-neutral-600" : "border-neutral-400"
               }`}
               placeholder="Send a comment"
             />
-            <div
-              className={`flex items-center justify-center rounded-full p-2 ${
+            <button
+              disabled={!comment.trim() || isLoadingComment}
+              onClick={() => handleSendComment(comment, post._id)}
+              className={`disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center rounded-full p-2 ${
                 theme === "dark"
                   ? "bg-neutral-700 cursor-pointer hover:bg-neutral-600/85"
                   : "bg-neutral-200 cursor-pointer hover:bg-neutral-300/80"
@@ -108,41 +147,15 @@ const PostModal = ({ post, setShowModal }) => {
                   theme === "dark" ? "text-neutral-400" : "text-neutral-600"
                 }`}
               />
-            </div>
+            </button>
           </div>
-          {post.comments.map((comment) => (
-            <div
-              key={comment._id}
-              className={`flex flex-col gap-1 rounded-lg p-2 ${
-                theme === "dark" ? "bg-neutral-800" : "bg-neutral-100"
-              }`}
-            >
-              <div className="flex gap-2 items-center">
-                <img
-                  src={comment.user.profile_picture}
-                  className="w-10 rounded-full cursor-pointer"
-                />
-                <p className="font-semibold cursor-pointer">
-                  {comment.user.username}
-                </p>
-                <p
-                  className={`text-xs ${
-                    theme === "dark" ? "text-neutral-400" : "text-neutral-600"
-                  }`}
-                >
-                  {moment(comment.createdAt).fromNow()}
-                </p>
-              </div>
-              <p className="font-light">{comment.message}</p>
-              <div className="flex gap-4 items-center">
-                <span className="font-medium cursor-pointer">Reply</span>
-                <HeartComponent
-                  currentUser={comment.user}
-                  likes={post.users_who_liked}
-                />
-              </div>
-            </div>
-          ))}
+          {post.comments.length > 0 ? (
+            post.comments.map((comment) => (
+              <Comment comment={comment} post={post} key={comment._id} />
+            ))
+          ) : (
+            <div>There are no comments yet</div>
+          )}
         </div>
       </div>
     </div>
