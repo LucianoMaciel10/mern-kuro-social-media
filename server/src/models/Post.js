@@ -11,7 +11,7 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     users_who_liked: [{ type: String, ref: "User" }],
-    comments: [{ type: String, ref: "Comment" }],
+    comments: [{  type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true, minimize: false }
 );

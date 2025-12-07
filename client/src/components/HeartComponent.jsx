@@ -12,7 +12,7 @@ const HeartComponent = ({likes, currentUser}) => {
     <Heart
       onClick={handleLike}
       className={`w-4 h-4 active:scale-90 transition cursor-pointer ${
-        likes.includes(currentUser._id) && "text-red-500 fill-red-500"
+        likes.includes(currentUser?._id) && "text-red-500 fill-red-500"
       }`}
     />
   );

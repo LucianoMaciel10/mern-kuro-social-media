@@ -11,9 +11,8 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const PostModal = ({ post, setShowModal }) => {
-  const [comments, setComments] = useState(post.comments || []);
   const [isLoadingComment, setIsLoadingComment] = useState(false);
-  const [comment, setComment] = useState();
+  const [comment, setComment] = useState('');
   const { theme } = useTheme();
   const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
@@ -39,7 +38,6 @@ const PostModal = ({ post, setShowModal }) => {
       );
 
       if (data.success) {
-        setComments([data.data, ...comments]);
         setComment("");
       }
     } catch (error) {
@@ -154,7 +152,7 @@ const PostModal = ({ post, setShowModal }) => {
               <Comment comment={comment} post={post} key={comment._id} />
             ))
           ) : (
-            <div>There are no comments yet</div>
+            <div className="text-neutral-500">There are no comments yet</div>
           )}
         </div>
       </div>

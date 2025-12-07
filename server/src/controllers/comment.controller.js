@@ -29,7 +29,9 @@ export const createComment = async (req, res) => {
       post: postId,
     });
 
-    // Populate para obtener datos del autor
+    post.comments.push(comment._id);
+    await post.save();
+
     await comment.populate("author", "username profile_picture full_name");
 
     res.json({
