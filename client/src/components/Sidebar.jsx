@@ -1,20 +1,42 @@
-import { UserButton, useClerk } from "@clerk/clerk-react";
+import { UserButton, useAuth, useClerk } from "@clerk/clerk-react";
 import { useTheme } from "next-themes";
-import { assets, dummyUserData } from "../assets/assets";
+import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import MenuItems from "./MenuItems";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { dark } from "@clerk/themes";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const Sidebar = () => {
+  const {getToken} = useAuth()
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const user = dummyUserData;
+  const [currentUser, setCurrentUser] = useState(null);
   const { signOut } = useClerk();
   const mediaQuery1280 = useMediaQuery(1280);
 
-  return (
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await getToken();
+
+        const { data } = await axios.get(`${API_URL}/api/user/data`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrentUser(data.user);
+      } catch (error) {
+        console.error("Error fetching comment:", error);
+      }
+    };
+
+    fetchData();
+  }, [getToken]);
+
+  return currentUser && (
     <div
       className={`
       xl:w-72 border-r
@@ -102,10 +124,9 @@ const Sidebar = () => {
                   />
                 </UserButton.MenuItems>
               </UserButton>
-              {/* hover:fill-[#C5C5C6] hover:text-[#C5C5C6] */}
               <div>
-                <h1 className="text-sm font-medium">{user.full_name}</h1>
-                <p className="text-xs text-gray-500">@{user.username}</p>
+                <h1 className="text-sm font-medium">{currentUser.full_name}</h1>
+                <p className="text-xs text-gray-500">@{currentUser.username}</p>
               </div>
             </div>
             <LogOut

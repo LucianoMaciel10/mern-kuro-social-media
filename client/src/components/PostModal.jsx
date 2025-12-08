@@ -10,9 +10,10 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-const PostModal = ({ post, setShowModal }) => {
+const PostModal = ({ post, setShowModal, onCommentAdded }) => {
   const [isLoadingComment, setIsLoadingComment] = useState(false);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState(post.comments || []);
   const { theme } = useTheme();
   const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
@@ -26,22 +27,40 @@ const PostModal = ({ post, setShowModal }) => {
     }">$1</span>`
   );
 
-  const handleSendComment = async (comment, postId) => {
+  const handleSendComment = async (commentText, postId) => {
     try {
+      if (!commentText || !commentText.trim()) {
+        console.error("Comment cannot be empty");
+        return;
+      }
+
+      setIsLoadingComment(true);
       const token = await getToken();
+
       const { data } = await axios.post(
         `${API_URL}/api/comments/create`,
-        { content: comment.trim(), postId },
+        {
+          content: commentText.trim(),
+          postId,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (data.success) {
+        setComments([...comments, data.data._id]);
         setComment("");
+        onCommentAdded?.({
+          ...post,
+          comments: [...post.comments, data.data._id],
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.error(
+        "Error posting comment:",
+        error.response?.data?.message || error.message
+      );
     } finally {
       setIsLoadingComment(false);
     }
@@ -54,7 +73,7 @@ const PostModal = ({ post, setShowModal }) => {
         mediaQuery1750 && "px-160!"
       }`}
     >
-      <div className="max-h-[70vh] relative overflow-y-scroll no-scrollbar rounded-lg">
+      <div className="max-h-[70vh] min-w-full relative overflow-y-scroll no-scrollbar rounded-lg">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -124,6 +143,12 @@ const PostModal = ({ post, setShowModal }) => {
             <input
               id="input-post-comment"
               type="text"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && comment.trim() && !isLoadingComment) {
+                  handleSendComment(comment, post._id);
+                }
+              }}
+              disabled={isLoadingComment}
               onChange={(e) => setComment(e.target.value)}
               value={comment}
               className={`rounded-full border outline-none w-full px-4 py-1 ${
@@ -147,9 +172,9 @@ const PostModal = ({ post, setShowModal }) => {
               />
             </button>
           </div>
-          {post.comments.length > 0 ? (
-            post.comments.map((comment) => (
-              <Comment comment={comment} post={post} key={comment._id} />
+          {comments.length > 0 ? (
+            comments.map((commentId) => (
+              <Comment commentId={commentId} post={post} key={commentId} />
             ))
           ) : (
             <div className="text-neutral-500">There are no comments yet</div>

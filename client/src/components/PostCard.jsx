@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
 
-const PostCard = ({ post, withShadow, currentUser, noReRender = false }) => {
+const PostCard = ({ post, withShadow, currentUser, handlePostUpdate, noReRender = false }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.users_who_liked);
@@ -89,14 +89,14 @@ const PostCard = ({ post, withShadow, currentUser, noReRender = false }) => {
             }
             className="w-5 h-5 cursor-pointer"
           />
-          <span>{12}</span>
+          <span>{post.comments.length}</span>
         </div>
         <div className="flex items-center gap-1">
           <Share2 className="w-5 h-5 cursor-pointer" />
-          <span>{7}</span>
+          <span>{0}</span>
         </div>
       </div>
-      {showModal && <PostModal post={post} setShowModal={setShowModal} />}
+      {showModal && <PostModal post={post} onCommentAdded={handlePostUpdate} setShowModal={setShowModal} />}
     </div>
   );
 };

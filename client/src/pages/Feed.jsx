@@ -16,10 +16,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 const Feed = () => {
   const { getToken } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [feeds, setFeeds] = useState();
+  const [posts, setPosts] = useState();
   const [loading, setLoading] = useState(true);
   const mediaQuery640 = useMediaQuery(640);
   const [currentUser, setCurrentUser] = useState({});
+
+  const handlePostUpdate = (updatedPost) => {
+    setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,13 +38,13 @@ const Feed = () => {
       }
     };
 
-    const fetchFeeds = async () => {
+    const fetchPosts = async () => {
       try {
         const token = await getToken();
         const res = await axios.get(`${API_URL}/api/posts/feed`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setFeeds(res.data.posts);
+        setPosts(res.data.posts);
       } catch (error) {
         console.log(error);
       } finally {
@@ -49,7 +53,7 @@ const Feed = () => {
     };
 
     fetchUserData();
-    fetchFeeds();
+    fetchPosts();
   }, [getToken]);
 
   return !loading ? (
@@ -97,8 +101,14 @@ const Feed = () => {
         )}
         <StoriesBar />
         <div className="space-y-6">
-          {feeds.map((post) => (
-            <PostCard key={post._id} currentUser={currentUser} post={post} withShadow={true} />
+          {posts.map((post) => (
+            <PostCard
+              handlePostUpdate={handlePostUpdate}
+              key={post._id}
+              currentUser={currentUser}
+              post={post}
+              withShadow={true}
+            />
           ))}
         </div>
       </div>
