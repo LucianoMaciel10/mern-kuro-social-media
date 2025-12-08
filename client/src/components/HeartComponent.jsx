@@ -11,26 +11,33 @@ const HeartComponent = ({ likes, userId, setLikes, postId }) => {
     try {
       const token = await getToken();
 
-      const { data } = await axios.post(`${API_URL}/api/posts/like`, postId, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.post(
+        `${API_URL}/api/posts/like`,
+        { postId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (data.success) {
+        let newLikes;
         if (likes.includes(userId)) {
-          setLikes(likes.filter((id) => id !== userId));
+          newLikes = likes.filter((id) => id !== userId);
         } else {
-          setLikes([...likes, userId]);
+          newLikes = [...likes, userId];
         }
+        
+        setLikes(newLikes);
       }
     } catch (error) {
-      console.error("Error fetching comment:", error);
+      console.error("Error liking post:", error);
     }
   };
 
   return (
     <Heart
       onClick={handleLike}
-      className={`w-4 h-4 active:scale-90 transition cursor-pointer ${
+      className={`w-5 h-5 active:scale-90 transition cursor-pointer ${
         likes.includes(userId) ? "text-red-500 fill-red-500" : ""
       }`}
     />

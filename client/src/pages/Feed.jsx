@@ -25,6 +25,12 @@ const Feed = () => {
     setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
   };
 
+  const handleLikeUpdate = (postId, updatedLikes) => {
+    setPosts(
+      posts.map((p) => (p._id === postId ? { ...p, likes: updatedLikes } : p))
+    );
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -104,6 +110,7 @@ const Feed = () => {
           {posts.map((post) => (
             <PostCard
               handlePostUpdate={handlePostUpdate}
+              onLikeUpdate={handleLikeUpdate}
               key={post._id}
               currentUser={currentUser}
               post={post}

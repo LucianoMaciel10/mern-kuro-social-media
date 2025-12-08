@@ -1,7 +1,7 @@
 import { BadgeCheck, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
@@ -11,11 +11,12 @@ const PostCard = ({
   withShadow,
   currentUser,
   handlePostUpdate,
+  onLikeUpdate,
   noReRender = false,
 }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [likes, setLikes] = useState(post.likes);
+  const [likes, setLikes] = useState(post.likes || []);
   const [showModal, setShowModal] = useState(false);
 
   const postWithHashtags = post.content.replace(
@@ -24,6 +25,24 @@ const PostCard = ({
       theme === "dark" ? "text-blue-500" : "text-blue-600"
     }">$1</span>`
   );
+
+  useEffect(() => {
+    setLikes(post.likes || []);
+  }, [post.likes]);
+
+  const handleLikeChange = (newLikes) => {
+    setLikes(newLikes);
+    if (noReRender) {
+      onLikeUpdate?.(newLikes);
+    } else {
+      onLikeUpdate?.(post._id, newLikes);
+    }
+  };
+
+  const handleModalLikeChange = (newLikes) => {
+    setLikes(newLikes);
+    onLikeUpdate?.(post._id, newLikes);
+  };
 
   return (
     <div
@@ -84,12 +103,12 @@ const PostCard = ({
       >
         <div className="flex items-center gap-1">
           <HeartComponent
-            userId={currentUser._id}
-            likes={likes}
-            setLikes={setLikes}
+            userId={currentUser?._id}
+            likes={likes || []}
             postId={post._id}
+            setLikes={handleLikeChange}
           />
-          <span>{likes}</span>
+          <span>{likes?.length || 0}</span>
         </div>
         <div className="flex items-center gap-1">
           <MessageCircle
@@ -109,8 +128,10 @@ const PostCard = ({
       </div>
       {showModal && (
         <PostModal
-          post={post}
+          post={{ ...post, likes }}
+          currentUser={currentUser}
           onCommentAdded={handlePostUpdate}
+          onLikeUpdate={handleModalLikeChange} // ✅ Usar handler específico para modal
           setShowModal={setShowModal}
         />
       )}

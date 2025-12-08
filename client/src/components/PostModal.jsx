@@ -4,21 +4,37 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import moment from "moment";
 import { SendHorizonal, X } from "lucide-react";
 import Comment from "./Comment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-const PostModal = ({ post, setShowModal, onCommentAdded }) => {
+const PostModal = ({
+  post,
+  setShowModal,
+  onCommentAdded,
+  onLikeUpdate,
+  currentUser,
+}) => {
   const [isLoadingComment, setIsLoadingComment] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
+  const [likes, setLikes] = useState(post.likes || []);
   const { theme } = useTheme();
   const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
   const mediaQuery1750 = useMediaQuery(1750);
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    setLikes(post.likes || []);
+  }, [post.likes]);
+
+  const handleLikeChange = (newLikes) => {
+    setLikes(newLikes);
+    onLikeUpdate?.(newLikes);
+  };
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -92,7 +108,13 @@ const PostModal = ({ post, setShowModal, onCommentAdded }) => {
                 : "bg-white"
             }`}
           >
-            <PostCard withShadow={false} post={post} noReRender={true} />
+            <PostCard
+              withShadow={false}
+              post={{ ...post, likes }}
+              noReRender={true}
+              currentUser={currentUser}
+              onLikeUpdate={handleLikeChange}
+            />
           </div>
         )}
         <div
