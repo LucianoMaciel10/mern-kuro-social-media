@@ -88,14 +88,12 @@ export const likePost = async (req, res) => {
 
     const post = await Post.findById(postId);
 
-    if (post.users_who_liked.includes(userId)) {
-      post.users_who_liked = post.users_who_liked.filter(
-        (user) => user !== userId
-      );
+    if (post.likes.includes(userId)) {
+      post.likes = post.likes.filter((user) => user !== userId);
       await post.save();
       res.json({ success: true, message: "Post unliked" });
     } else {
-      post.users_who_liked.push(userId);
+      post.likes.push(userId);
       await post.save();
       res.json({ success: true, message: "Post liked" });
     }

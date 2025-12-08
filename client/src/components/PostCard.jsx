@@ -6,10 +6,16 @@ import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
 
-const PostCard = ({ post, withShadow, currentUser, handlePostUpdate, noReRender = false }) => {
+const PostCard = ({
+  post,
+  withShadow,
+  currentUser,
+  handlePostUpdate,
+  noReRender = false,
+}) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [likes, setLikes] = useState(post.users_who_liked);
+  const [likes, setLikes] = useState(post.likes);
   const [showModal, setShowModal] = useState(false);
 
   const postWithHashtags = post.content.replace(
@@ -77,8 +83,13 @@ const PostCard = ({ post, withShadow, currentUser, handlePostUpdate, noReRender 
         }`}
       >
         <div className="flex items-center gap-1">
-          <HeartComponent currentUser={currentUser} likes={likes} />
-          <span>{likes.length}</span>
+          <HeartComponent
+            userId={currentUser._id}
+            likes={likes}
+            setLikes={setLikes}
+            postId={post._id}
+          />
+          <span>{likes}</span>
         </div>
         <div className="flex items-center gap-1">
           <MessageCircle
@@ -96,7 +107,13 @@ const PostCard = ({ post, withShadow, currentUser, handlePostUpdate, noReRender 
           <span>{0}</span>
         </div>
       </div>
-      {showModal && <PostModal post={post} onCommentAdded={handlePostUpdate} setShowModal={setShowModal} />}
+      {showModal && (
+        <PostModal
+          post={post}
+          onCommentAdded={handlePostUpdate}
+          setShowModal={setShowModal}
+        />
+      )}
     </div>
   );
 };

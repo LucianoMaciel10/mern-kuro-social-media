@@ -10,8 +10,8 @@ const postSchema = new mongoose.Schema(
       enum: ["text", "image", "text_with_image"],
       required: true,
     },
-    users_who_liked: [{ type: String, ref: "User" }],
-    comments: [{  type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    likes: [{ type: String, ref: "User" }],
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true, minimize: false }
 );
