@@ -1,45 +1,155 @@
+import imagekit from "../configs/imagekit.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 
-// Enviar mensaje
-export const sendMessage = async (req, res) => {
+const connections = {};
+
+// SSE Controller para conectar usuarios
+export const sseController = async (req, res) => {
   try {
     const { userId } = await req.auth();
-    const { receiverId, content } = req.body;
 
-    if (!receiverId || !content?.trim()) {
-      return res.status(400).json({
+    if (!userId) {
+      return res.status(401).json({
         success: false,
-        message: "Receiver ID and content are required",
+        message: "Not authenticated",
       });
     }
 
-    if (userId === receiverId) {
+    console.log("New Client connected:", userId);
+
+    // Headers SSE
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    // Guardar la conexión
+    connections[userId] = res;
+
+    // Enviar mensaje de conexión
+    res.write("data: Connected to messaging stream\n\n");
+
+    // Heartbeat cada 30 segundos para mantener la conexión viva
+    const heartbeatInterval = setInterval(() => {
+      try {
+        res.write(": heartbeat\n\n");
+      } catch (error) {
+        clearInterval(heartbeatInterval);
+        delete connections[userId];
+      }
+    }, 30000);
+
+    // Manejar desconexión
+    req.on("close", () => {
+      clearInterval(heartbeatInterval);
+      delete connections[userId];
+      console.log("Client disconnected:", userId);
+    });
+
+    req.on("error", () => {
+      clearInterval(heartbeatInterval);
+      delete connections[userId];
+      console.log("Client error:", userId);
+    });
+  } catch (error) {
+    console.error("sseController error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const sendMessage = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+    const { receiver, content } = req.body;
+    const image = req.file;
+
+    if (!receiver) {
+      return res.status(400).json({
+        success: false,
+        message: "Receiver is required",
+      });
+    }
+
+    if (!content?.trim() && !image) {
+      return res.status(400).json({
+        success: false,
+        message: "Content or media is required",
+      });
+    }
+
+    if (userId === receiver) {
       return res.status(400).json({
         success: false,
         message: "Cannot send message to yourself",
       });
     }
 
-    const receiver = await User.findById(receiverId);
-    if (!receiver) {
+    const receiverUser = await User.findById(receiver);
+    if (!receiverUser) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "Receiver not found",
       });
+    }
+
+    let media_url = "";
+    let message_type = image ? "image" : "text";
+
+    if (message_type === "image") {
+      try {
+        const response = await imagekit.upload({
+          file: image.buffer,
+          fileName: `message-${userId}-${Date.now()}`,
+          folder: "/messages",
+        });
+
+        media_url = imagekit.url({
+          path: response.filePath,
+          transformation: [
+            { quality: "auto" },
+            { format: "webp" },
+            { width: "1280" },
+          ],
+        });
+      } catch (error) {
+        console.error("ImageKit upload error:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to upload image",
+        });
+      }
     }
 
     const message = await Message.create({
       sender: userId,
-      receiver: receiverId,
-      content: content.trim(),
+      receiver,
+      content: content?.trim() || "",
+      message_type,
+      media_url,
     });
+
+    await message.populate("sender", "username profile_picture full_name");
 
     res.json({
       success: true,
       message: "Message sent successfully",
       data: message,
     });
+
+    if (connections[receiver]) {
+      try {
+        connections[receiver].write(`data: ${JSON.stringify(message)}\n\n`);
+      } catch (error) {
+        console.error("Error writing to SSE connection:", error);
+        delete connections[receiver];
+      }
+    } else {
+      console.log(`Receiver ${receiver} is not connected to SSE`);
+    }
   } catch (error) {
     console.error("sendMessage error:", error);
     res.status(500).json({
@@ -139,7 +249,7 @@ export const getConversationMessages = async (req, res) => {
         { sender: userId, receiver: otherUserId },
         { sender: otherUserId, receiver: userId },
       ],
-    }).sort({ createdAt: 1 });
+    }).sort({ createdAt: -1 });
 
     // Marcar como leídos los mensajes recibidos
     await Message.updateMany(
@@ -242,6 +352,63 @@ export const deleteMessage = async (req, res) => {
     });
   } catch (error) {
     console.error("deleteMessage error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};
+
+export const getUserRecentMessages = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
+    // Obtener mensajes recibidos Y enviados
+    const messages = await Message.find({
+      $or: [{ receiver: userId }, { sender: userId }],
+    })
+      .populate(
+        "sender receiver",
+        "username profile_picture full_name"
+      )
+      .sort({ createdAt: -1 })
+      .limit(80); // Obtener suficientes para agrupar en ~8 conversaciones
+
+    // Agrupar por conversación (sender/receiver)
+    const conversations = {};
+
+    messages.forEach((msg) => {
+      const otherUserId =
+        msg.sender._id === userId ? msg.receiver._id : msg.sender._id;
+
+      if (!conversations[otherUserId]) {
+        conversations[otherUserId] = {
+          otherUser: msg.sender._id === userId ? msg.receiver : msg.sender,
+          lastMessage: msg.content,
+          lastMessageTime: msg.createdAt,
+          unreadCount: msg.receiver._id === userId && !msg.isRead ? 1 : 0,
+        };
+      } else if (msg.receiver._id === userId && !msg.isRead) {
+        conversations[otherUserId].unreadCount += 1;
+      }
+    });
+
+    // Limitar a 8 conversaciones
+    const recentConversations = Object.values(conversations).slice(0, 8);
+
+    res.json({
+      success: true,
+      data: recentConversations,
+    });
+  } catch (error) {
+    console.error("getUserRecentMessages error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",

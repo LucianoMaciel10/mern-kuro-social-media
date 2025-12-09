@@ -1,5 +1,5 @@
 import express from "express";
-import { discoverUsers, followUser, getUserData, togglePrivacy, unfollowUser, updateUserData } from "../controllers/user.controller.js";
+import { discoverUsers, followUser, getUserData, getUserProfiles, togglePrivacy, unfollowUser, updateUserData } from "../controllers/user.controller.js";
 import { protect } from "../middlewares/auth.js";
 import { upload } from "../configs/multer.js";
 
@@ -11,5 +11,6 @@ userRouter.post('/discover', protect, discoverUsers);
 userRouter.post('/follow', protect, followUser);
 userRouter.post('/unfollow', protect, unfollowUser);
 userRouter.post('/toggle-privacy', protect, togglePrivacy);
+userRouter.post('/profiles', protect, getUserProfiles);
 
 export default userRouter;

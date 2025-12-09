@@ -9,6 +9,7 @@ import userRouter from "./routes/user.routes.js";
 import messageRouter from "./routes/message.routes.js";
 import postRouter from "./routes/post.routes.js";
 import commentRouter from "./routes/comment.routes.js";
+import storyRouter from "./routes/story.routes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/user", userRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/comments", commentRouter);
+app.use("/api/stories", storyRouter);
 
 connectDB().then(() =>
   app.listen(PORT, () => console.log("Server is running on port " + PORT))

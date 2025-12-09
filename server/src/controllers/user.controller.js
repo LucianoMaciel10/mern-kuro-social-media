@@ -1,10 +1,11 @@
 import imagekit from "../configs/imagekit.js";
 import User from "../models/User.js";
 import fs from "fs/promises";
+import Post from "../models/Post.js";
 
 export const getUserData = async (req, res) => {
   try {
-    const { userId } = req.auth();
+    const { userId } = await req.auth();
     const user = await User.findById(userId);
     if (!user) return res.json({ success: false, message: "User not found" });
     res.json({ success: true, user });
@@ -16,7 +17,7 @@ export const getUserData = async (req, res) => {
 
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = await req.auth();
+    const { userId } = await await req.auth();
     const { username, bio, location, full_name } = req.body;
     const hasFiles = req.files?.profile || req.files?.cover;
 
@@ -168,7 +169,7 @@ export const updateUserData = async (req, res) => {
 
 export const discoverUsers = async (req, res) => {
   try {
-    const { userId } = req.auth();
+    const { userId } = await req.auth();
     const { input } = req.body;
 
     const allUsers = await User.find({
@@ -189,7 +190,7 @@ export const discoverUsers = async (req, res) => {
 
 export const followUser = async (req, res) => {
   try {
-    const { userId } = req.auth();
+    const { userId } = await req.auth();
     const { id } = req.body;
 
     const user = await User.findById(userId);
@@ -217,7 +218,7 @@ export const followUser = async (req, res) => {
 
 export const unfollowUser = async (req, res) => {
   try {
-    const { userId } = req.auth();
+    const { userId } = await req.auth();
     const { id } = req.body;
 
     const user = await User.findById(userId);
@@ -241,11 +242,13 @@ export const unfollowUser = async (req, res) => {
 
 export const togglePrivacy = async (req, res) => {
   try {
-    const { userId } = await req.auth();
+    const { userId } = await await req.auth();
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     user.isPrivate = !user.isPrivate;
@@ -262,5 +265,25 @@ export const togglePrivacy = async (req, res) => {
       success: false,
       message: error.message || "Internal server error",
     });
+  }
+};
+
+export const getUserProfiles = async (req, res) => {
+  try {
+    const { profileId } = req.body;
+    const profile = await User.findById(profileId);
+
+    if (!profile) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Profile not found" });
+    }
+
+    const post = await Post.find({ user: profileId }).populate("user");
+
+    res.json({ success: true, profile, post });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
 };
