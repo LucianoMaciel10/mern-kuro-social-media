@@ -1,11 +1,11 @@
 import { useTheme } from "next-themes";
-import { dummyUserData } from "../assets/assets";
-import { MapPin, MessageCircle, Plus, UserCheck, UserPlus } from "lucide-react";
+import { MapPin, MessageCircle, UserCheck, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const UserCard = ({ user }) => {
   const { theme } = useTheme();
-  const currentUser = dummyUserData;
+  const currentUser = useSelector((state) => state.user.value);
   const navigate = useNavigate();
 
   const handleFollow = async () => {};

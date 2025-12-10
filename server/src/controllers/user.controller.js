@@ -17,7 +17,7 @@ export const getUserData = async (req, res) => {
 
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = await await req.auth();
+    const { userId } = await req.auth();
     const { username, bio, location, full_name } = req.body;
     const hasFiles = req.files?.profile || req.files?.cover;
 
@@ -242,7 +242,7 @@ export const unfollowUser = async (req, res) => {
 
 export const togglePrivacy = async (req, res) => {
   try {
-    const { userId } = await await req.auth();
+    const { userId } = await req.auth();
 
     const user = await User.findById(userId);
     if (!user) {
@@ -279,9 +279,9 @@ export const getUserProfiles = async (req, res) => {
         .json({ success: false, message: "Profile not found" });
     }
 
-    const post = await Post.find({ user: profileId }).populate("user");
+    const posts = await Post.find({ user: profileId }).populate("user");
 
-    res.json({ success: true, profile, post });
+    res.json({ success: true, profile, posts });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

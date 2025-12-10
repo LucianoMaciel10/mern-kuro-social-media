@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
+import { useSelector } from "react-redux";
 
 const PostCard = ({
   post,
   withShadow,
-  currentUser,
   handlePostUpdate,
   onLikeUpdate,
   noReRender = false,
@@ -18,6 +18,7 @@ const PostCard = ({
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.likes || []);
   const [showModal, setShowModal] = useState(false);
+  const user = useSelector((state) => state.user.value)
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -37,11 +38,6 @@ const PostCard = ({
     } else {
       onLikeUpdate?.(post._id, newLikes);
     }
-  };
-
-  const handleModalLikeChange = (newLikes) => {
-    setLikes(newLikes);
-    onLikeUpdate?.(post._id, newLikes);
   };
 
   return (
@@ -103,7 +99,7 @@ const PostCard = ({
       >
         <div className="flex items-center gap-1">
           <HeartComponent
-            userId={currentUser?._id}
+            userId={user?._id}
             likes={likes || []}
             postId={post._id}
             setLikes={handleLikeChange}
@@ -129,9 +125,9 @@ const PostCard = ({
       {showModal && (
         <PostModal
           post={{ ...post, likes }}
-          currentUser={currentUser}
+          currentUser={user}
           onCommentAdded={handlePostUpdate}
-          onLikeUpdate={handleModalLikeChange} // ✅ Usar handler específico para modal
+          onLikeUpdate={handleLikeChange}
           setShowModal={setShowModal}
         />
       )}

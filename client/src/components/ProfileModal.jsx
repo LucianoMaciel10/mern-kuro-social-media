@@ -1,12 +1,15 @@
 import { useTheme } from "next-themes";
-import { dummyUserData } from "../assets/assets";
 import { useState } from "react";
 import { Pencil, X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../features/user/userSlice";
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
 
 const ProfileModal = ({ setShowEdit }) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
-  const user = dummyUserData;
+  const user = useSelector((state) => state.user.value);
   const [editForm, setEditForm] = useState({
     username: user.username,
     bio: user.bio,
@@ -15,9 +18,34 @@ const ProfileModal = ({ setShowEdit }) => {
     cover_photo: null,
     full_name: user.full_name,
   });
+  const dispatch = useDispatch();
+  const { getToken } = useAuth();
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+    try {
+      const userData = new FormData();
+      const {
+        full_name,
+        username,
+        bio,
+        location,
+        profile_picture,
+        cover_photo,
+      } = editForm;
+      userData.append("username", username);
+      userData.append("bio", bio);
+      userData.append("location", location);
+      userData.append("full_name", full_name);
+      if (profile_picture) userData.append("profile", profile_picture);
+      if (cover_photo) userData.append("cover", cover_photo);
+
+      const token = await getToken();
+      dispatch(updateUser({ userData, token }));
+      setShowEdit(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -54,7 +82,12 @@ const ProfileModal = ({ setShowEdit }) => {
           >
             Edit Profile
           </h1>
-          <form className="space-y-4" onSubmit={handleSaveProfile}>
+          <form
+            className="space-y-4"
+            onSubmit={(e) =>
+              toast.promise(handleSaveProfile(e), { loading: "Saving..." })
+            }
+          >
             <div className="flex flex-col gap-1">
               <p
                 className={`text-sm font-medium ${
@@ -104,7 +137,7 @@ const ProfileModal = ({ setShowEdit }) => {
                 Cover Photo
               </p>
               <label
-                className="cursor-pointer sm:px-4"
+                className="cursor-pointer sm:px-4 w-full"
                 style={{ pointerEvents: "none" }}
               >
                 <input
@@ -119,7 +152,15 @@ const ProfileModal = ({ setShowEdit }) => {
                   accept="image/*"
                 />
                 <div
-                  className="group/profile relative rounded-lg overflow-hidden w-full max-w-[600px] aspect-1.5/1 sm:aspect-2/1"
+                  className={`group/profile relative rounded-lg overflow-hidden w-full max-w-[600px] aspect-video sm:aspect-2/1
+                      ${
+                        !editForm.cover_photo &&
+                        !user.cover_photo &&
+                        theme === "dark"
+                          ? "bg-linear-to-l from-neutral-950/10 to-blue-900"
+                          : "bg-linear-to-l from-sky-300/60 to-sky-600"
+                      }
+                    `}
                   style={{ pointerEvents: "auto" }}
                 >
                   <img
@@ -127,6 +168,8 @@ const ProfileModal = ({ setShowEdit }) => {
                       editForm.cover_photo
                         ? URL.createObjectURL(editForm.cover_photo)
                         : user.cover_photo
+                        ? user.cover_photo
+                        : null
                     }
                     className="w-full h-full object-cover"
                   />

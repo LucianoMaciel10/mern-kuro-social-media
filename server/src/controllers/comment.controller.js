@@ -4,7 +4,7 @@ import Post from "../models/Post.js";
 // Crear comentario
 export const createComment = async (req, res) => {
   try {
-    const { userId } = await await req.auth();
+    const { userId } = await req.auth();
     const { postId, content } = req.body;
 
     if (!postId || !content?.trim()) {
@@ -133,7 +133,7 @@ export const getComment = async (req, res) => {
 // Like/Unlike comentario
 export const toggleCommentLike = async (req, res) => {
   try {
-    const { userId } = await await req.auth();
+    const { userId } = await req.auth();
     const { commentId } = req.params;
 
     const comment = await Comment.findById(commentId);
@@ -178,7 +178,7 @@ export const toggleCommentLike = async (req, res) => {
 // Eliminar comentario
 export const deleteComment = async (req, res) => {
   try {
-    const { userId } = await await req.auth();
+    const { userId } = await req.auth();
     const { commentId } = req.params;
 
     const comment = await Comment.findById(commentId);

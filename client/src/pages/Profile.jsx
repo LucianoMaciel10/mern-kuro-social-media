@@ -1,6 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { dummyPostsData, dummyUserData } from "../assets/assets";
 import { useTheme } from "next-themes";
 import Loading from "../components/Loading";
 import UserProfileInfo from "../components/UserProfileInfo";
@@ -8,28 +8,49 @@ import PostCard from "../components/PostCard";
 import moment from "moment";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import ProfileModal from "../components/ProfileModal";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const Profile = () => {
+  const currentUser = useSelector((state) => state.user.value);
+  const { getToken } = useAuth();
   const { theme } = useTheme();
   const { profileId } = useParams();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [showEdit, setShowEdit] = useState(false);
-  const [loading, setLoading] = useState(false);
   const mediaQuery1536 = useMediaQuery(1536);
   const mediaQuery768 = useMediaQuery(768);
 
-  const fetchUser = async () => {
-    setUser(dummyUserData);
-    setPosts(dummyPostsData);
+  const fetchUser = async (profileId) => {
+    const token = await getToken();
+    try {
+      const { data } = await api.post(
+        "/api/user/profiles",
+        { profileId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        setUser(data.profile);
+        setPosts(data.post);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    (() => {
-      fetchUser();
-    })();
-  }, []);
+    if (profileId) {
+      fetchUser(profileId);
+    } else {
+      fetchUser(currentUser._id);
+    }
+  }, [profileId, currentUser]);
 
   return user ? (
     <div
@@ -92,7 +113,7 @@ const Profile = () => {
             ))}
           </div>
 
-          {activeTab === "posts" && (
+          {(activeTab === "posts" && posts.length > 0) && (
             <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
               {posts.map((post) => (
                 <PostCard post={post} key={post._id} />
@@ -100,7 +121,7 @@ const Profile = () => {
             </div>
           )}
 
-          {activeTab === "media" && (
+          {(activeTab === "media" && posts.length > 0) && (
             <div className="pb-27 sm:pb-6 flex justify-center">
               <div
                 className={`w-fit grid gap-6 justify-items-center p-6 mt-6 rounded-lg shadow ${

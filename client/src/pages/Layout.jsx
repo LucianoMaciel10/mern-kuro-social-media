@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { dummyUserData } from "../assets/assets";
 import Loading from "../components/Loading";
 import { useTheme } from "next-themes";
 import Navbar from "../components/Navbar";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useSelector } from "react-redux";
 
 const Layout = () => {
   const { theme } = useTheme();
-  const user = dummyUserData;
+  const user = useSelector((state) => state.user.value);
   const mediaQuery640 = useMediaQuery(640);
 
   return user ? (

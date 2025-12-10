@@ -19,7 +19,6 @@ const Feed = () => {
   const [posts, setPosts] = useState();
   const [loading, setLoading] = useState(true);
   const mediaQuery640 = useMediaQuery(640);
-  const [currentUser, setCurrentUser] = useState({});
 
   const handlePostUpdate = (updatedPost) => {
     setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
@@ -32,18 +31,6 @@ const Feed = () => {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = await getToken();
-        const res = await axios.get(`${API_URL}/api/user/data`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCurrentUser(res.data.user);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     const fetchPosts = async () => {
       try {
         const token = await getToken();
@@ -58,7 +45,6 @@ const Feed = () => {
       }
     };
 
-    fetchUserData();
     fetchPosts();
   }, [getToken]);
 
@@ -112,7 +98,6 @@ const Feed = () => {
               handlePostUpdate={handlePostUpdate}
               onLikeUpdate={handleLikeUpdate}
               key={post._id}
-              currentUser={currentUser}
               post={post}
               withShadow={true}
             />

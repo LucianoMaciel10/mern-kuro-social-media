@@ -4,6 +4,8 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ThemeProvider } from "next-themes";
+import { Provider } from "react-redux";
+import { store } from "./app/store.js";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -15,7 +17,9 @@ createRoot(document.getElementById("root")).render(
   <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
     <BrowserRouter>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <App />
+        <Provider store={store}>
+          <App />
+        </Provider>
       </ThemeProvider>
     </BrowserRouter>
   </ClerkProvider>

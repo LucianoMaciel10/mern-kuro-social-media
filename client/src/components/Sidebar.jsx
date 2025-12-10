@@ -1,4 +1,4 @@
-import { UserButton, useAuth, useClerk } from "@clerk/clerk-react";
+import { UserButton, useClerk } from "@clerk/clerk-react";
 import { useTheme } from "next-themes";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
@@ -6,37 +6,16 @@ import MenuItems from "./MenuItems";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { dark } from "@clerk/themes";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { useSelector } from "react-redux";
 
 const Sidebar = () => {
-  const {getToken} = useAuth()
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null);
   const { signOut } = useClerk();
   const mediaQuery1280 = useMediaQuery(1280);
+  const user = useSelector((state) => state.user.value)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = await getToken();
-
-        const { data } = await axios.get(`${API_URL}/api/user/data`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCurrentUser(data.user);
-      } catch (error) {
-        console.error("Error fetching comment:", error);
-      }
-    };
-
-    fetchData();
-  }, [getToken]);
-
-  return currentUser && (
+  return user && (
     <div
       className={`
       xl:w-72 border-r
@@ -125,8 +104,8 @@ const Sidebar = () => {
                 </UserButton.MenuItems>
               </UserButton>
               <div>
-                <h1 className="text-sm font-medium">{currentUser.full_name}</h1>
-                <p className="text-xs text-gray-500">@{currentUser.username}</p>
+                <h1 className="text-sm font-medium">{user.full_name}</h1>
+                <p className="text-xs text-gray-500">@{user.username}</p>
               </div>
             </div>
             <LogOut
