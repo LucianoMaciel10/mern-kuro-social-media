@@ -5,7 +5,7 @@ import { addUserStory, deleteStory, getStories } from "../controllers/story.cont
 
 const storyRouter = express.Router();
 
-storyRouter.post("/create", upload.single("media"), protect, addUserStory);
+storyRouter.post("/create", protect, upload.single("media"), addUserStory);
 storyRouter.get("/get", protect, getStories);
 storyRouter.delete("/:storyId", protect, deleteStory);
 

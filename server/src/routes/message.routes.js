@@ -14,7 +14,7 @@ import {
 const messageRouter = express.Router();
 
 messageRouter.get("/sse", sseController); // SSE - Conexión en tiempo real
-messageRouter.post("/send", upload.single("image"), protect, sendMessage);
+messageRouter.post("/send", protect, upload.single("image"), sendMessage);
 messageRouter.get("/conversations", protect, getConversations);
 messageRouter.get("/conversation/:otherUserId", protect, getConversationMessages);
 messageRouter.get("/recent", protect, getUserRecentMessages);

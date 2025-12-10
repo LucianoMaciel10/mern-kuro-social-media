@@ -105,7 +105,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
                   theme === "dark" ? "text-neutral-200" : "text-neutral-900"
                 }`}
               >
-                {posts.length}
+                {posts?.length}
               </span>
               <span className="text-xs sm:text-sm ml-1.5 text-neutral-500">
                 Posts

@@ -113,7 +113,7 @@ const Profile = () => {
             ))}
           </div>
 
-          {(activeTab === "posts" && posts.length > 0) && (
+          {(activeTab === "posts" && posts && posts.length > 0) && (
             <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
               {posts.map((post) => (
                 <PostCard post={post} key={post._id} />
@@ -121,7 +121,7 @@ const Profile = () => {
             </div>
           )}
 
-          {(activeTab === "media" && posts.length > 0) && (
+          {(activeTab === "media" && posts && posts.length > 0) && (
             <div className="pb-27 sm:pb-6 flex justify-center">
               <div
                 className={`w-fit grid gap-6 justify-items-center p-6 mt-6 rounded-lg shadow ${
