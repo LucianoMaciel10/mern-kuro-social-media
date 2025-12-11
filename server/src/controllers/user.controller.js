@@ -17,11 +17,36 @@ export const getUserData = async (req, res) => {
 
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = await req.auth();
+    console.log("🔍 [updateUserData] Iniciando actualización de perfil");
+
+    // 1. Obtener userId
+    const authResult = await req.auth();
+    if (!authResult?.userId) {
+      console.log("❌ [updateUserData] No hay userId");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: No user ID found",
+      });
+    }
+
+    const { userId } = authResult;
+    console.log("✅ [updateUserData] userId:", userId);
+
+    // 2. Obtener datos del body
     const { username, bio, location, full_name } = req.body;
+    console.log("📦 [updateUserData] Body recibido:", {
+      username,
+      bio,
+      location,
+      full_name,
+    });
+
+    // 3. Verificar si hay archivos
+    console.log("📁 [updateUserData] Files:", req.files ? Object.keys(req.files) : "none");
+
     const hasFiles = req.files?.profile || req.files?.cover;
 
-    // Validar que al menos un campo sea proporcionado
+    // 4. Validar que al menos un campo sea proporcionado
     if (!username && !bio && !location && !full_name && !hasFiles) {
       return res.status(400).json({
         success: false,
@@ -29,18 +54,22 @@ export const updateUserData = async (req, res) => {
       });
     }
 
-    // Obtener usuario actual
+    // 5. Obtener usuario actual
     const tempUser = await User.findById(userId);
     if (!tempUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      console.log("❌ [updateUserData] Usuario no encontrado");
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+    console.log("✅ [updateUserData] Usuario encontrado:", tempUser._id);
 
     const updatedData = {};
 
-    // Validar y usar username solo si fue proporcionado
+    // 6. Validar username
     if (username) {
+      console.log("🔄 [updateUserData] Validando username:", username);
       if (username.length < 3) {
         return res.status(400).json({
           success: false,
@@ -60,8 +89,9 @@ export const updateUserData = async (req, res) => {
       updatedData.username = username;
     }
 
-    // Validar otros campos si existen
-    if (bio !== undefined) {
+    // 7. Validar bio
+    if (bio !== undefined && bio !== null) {
+      console.log("🔄 [updateUserData] Validando bio");
       if (bio.length > 150) {
         return res.status(400).json({
           success: false,
@@ -71,11 +101,15 @@ export const updateUserData = async (req, res) => {
       updatedData.bio = bio;
     }
 
-    if (location !== undefined) {
+    // 8. Validar location
+    if (location !== undefined && location !== null) {
+      console.log("🔄 [updateUserData] Actualizando location:", location);
       updatedData.location = location;
     }
 
-    if (full_name !== undefined) {
+    // 9. Validar full_name
+    if (full_name !== undefined && full_name !== null) {
+      console.log("🔄 [updateUserData] Validando full_name:", full_name);
       if (full_name.length < 2) {
         return res.status(400).json({
           success: false,
@@ -85,16 +119,21 @@ export const updateUserData = async (req, res) => {
       updatedData.full_name = full_name;
     }
 
-    // Procesar imagen de perfil
+    // 10. Procesar imagen de perfil
     if (req.files?.profile) {
+      console.log("📸 [updateUserData] Procesando imagen de perfil");
       const profile = req.files.profile[0];
       try {
         const buffer = profile.buffer;
+        console.log("📤 [updateUserData] Subiendo a ImageKit, tamaño:", buffer.length);
+
         const response = await imagekit.upload({
           file: buffer,
           fileName: `profile-${userId}-${Date.now()}`,
           folder: "/profiles",
         });
+
+        console.log("✅ [updateUserData] Imagen de perfil subida:", response.fileId);
 
         const url = imagekit.url({
           path: response.filePath,
@@ -105,27 +144,31 @@ export const updateUserData = async (req, res) => {
           ],
         });
         updatedData.profile_picture = url;
-
-        await fs.unlink(profile.path);
+        console.log("✅ [updateUserData] URL de perfil generada");
       } catch (error) {
-        console.error("Profile upload error:", error);
+        console.error("❌ [updateUserData] Error en upload de perfil:", error.message);
         return res.status(500).json({
           success: false,
-          message: "Error uploading profile picture",
+          message: "Error uploading profile picture: " + error.message,
         });
       }
     }
 
-    // Procesar imagen de portada
+    // 11. Procesar imagen de portada
     if (req.files?.cover) {
+      console.log("📸 [updateUserData] Procesando imagen de portada");
       const cover = req.files.cover[0];
       try {
         const buffer = cover.buffer;
+        console.log("📤 [updateUserData] Subiendo cover a ImageKit, tamaño:", buffer.length);
+
         const response = await imagekit.upload({
           file: buffer,
           fileName: `cover-${userId}-${Date.now()}`,
           folder: "/covers",
         });
+
+        console.log("✅ [updateUserData] Cover subido:", response.fileId);
 
         const url = imagekit.url({
           path: response.filePath,
@@ -136,30 +179,41 @@ export const updateUserData = async (req, res) => {
           ],
         });
         updatedData.cover_photo = url;
-
-        await fs.unlink(cover.path);
+        console.log("✅ [updateUserData] URL de cover generada");
       } catch (error) {
-        console.error("Cover upload error:", error);
+        console.error("❌ [updateUserData] Error en upload de cover:", error.message);
         return res.status(500).json({
           success: false,
-          message: "Error uploading cover photo",
+          message: "Error uploading cover photo: " + error.message,
         });
       }
     }
 
-    // Actualizar usuario
+    // 12. Actualizar usuario en BD
+    console.log("💾 [updateUserData] Actualizando usuario con datos:", Object.keys(updatedData));
     const user = await User.findByIdAndUpdate(userId, updatedData, {
       new: true,
       runValidators: true,
     });
 
+    if (!user) {
+      console.log("❌ [updateUserData] Error al actualizar usuario");
+      return res.status(500).json({
+        success: false,
+        message: "Error updating user",
+      });
+    }
+
+    console.log("✅ [updateUserData] Perfil actualizado exitosamente");
     res.json({
       success: true,
       message: "Profile updated successfully",
       user,
     });
   } catch (error) {
-    console.error("updateUserData error:", error);
+    console.error("❌ [updateUserData] ERROR GENERAL:", error.message);
+    console.error("Stack:", error.stack);
+
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
