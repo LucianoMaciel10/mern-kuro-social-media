@@ -35,7 +35,7 @@ const Profile = () => {
       );
       if (data.success) {
         setUser(data.profile);
-        setPosts(data.post);
+        setPosts(data.posts);
       } else {
         toast.error(data.message);
       }

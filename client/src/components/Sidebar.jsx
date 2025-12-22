@@ -57,10 +57,10 @@ const Sidebar = () => {
         />
         <MenuItems
           flex={"flex-col"}
-          selectItemDark={"bg-gray-800 text-blue-500 p-3"}
+          selectItemDark={"bg-neutral-800 text-blue-500 p-3"}
           selectItemLight={"bg-neutral-200 text-blue-500 p-3"}
-          unselectItemsDark={"hover:bg-neutral-800 text-neutral-500 p-3"}
-          unselectItemsLight={"hover:bg-neutral-200 text-neutral-500 p-3"}
+          unselectItemsDark={"hover:bg-neutral-800/40 text-neutral-500 p-3"}
+          unselectItemsLight={"hover:bg-neutral-200/30 text-neutral-500 p-3"}
         />
       </div>
       <div

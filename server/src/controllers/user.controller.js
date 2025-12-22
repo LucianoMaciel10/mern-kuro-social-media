@@ -17,29 +17,35 @@ export const getUserData = async (req, res) => {
 
 export const updateUserData = async (req, res) => {
   try {
-    const { userId } = await req.auth();
-    const { username, bio, location, full_name } = req.body;
+    const authResult = await req.auth();
+    if (!authResult?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: No user ID found",
+      });
+    }
+
+    const { userId } = authResult;
+    const { username, bio, location, full_name, privacy } = req.body;
     const hasFiles = req.files?.profile || req.files?.cover;
 
-    // Validar que al menos un campo sea proporcionado
-    if (!username && !bio && !location && !full_name && !hasFiles) {
+    if (!username && !bio && !location && !full_name && !hasFiles && !privacy) {
       return res.status(400).json({
         success: false,
         message: "At least one field must be provided",
       });
     }
 
-    // Obtener usuario actual
     const tempUser = await User.findById(userId);
     if (!tempUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     const updatedData = {};
 
-    // Validar y usar username solo si fue proporcionado
     if (username) {
       if (username.length < 3) {
         return res.status(400).json({
@@ -60,8 +66,7 @@ export const updateUserData = async (req, res) => {
       updatedData.username = username;
     }
 
-    // Validar otros campos si existen
-    if (bio !== undefined) {
+    if (bio !== undefined && bio !== null) {
       if (bio.length > 150) {
         return res.status(400).json({
           success: false,
@@ -71,11 +76,11 @@ export const updateUserData = async (req, res) => {
       updatedData.bio = bio;
     }
 
-    if (location !== undefined) {
+    if (location !== undefined && location !== null) {
       updatedData.location = location;
     }
 
-    if (full_name !== undefined) {
+    if (full_name !== undefined && full_name !== null) {
       if (full_name.length < 2) {
         return res.status(400).json({
           success: false,
@@ -85,7 +90,6 @@ export const updateUserData = async (req, res) => {
       updatedData.full_name = full_name;
     }
 
-    // Procesar imagen de perfil
     if (req.files?.profile) {
       const profile = req.files.profile[0];
       try {
@@ -105,18 +109,14 @@ export const updateUserData = async (req, res) => {
           ],
         });
         updatedData.profile_picture = url;
-
-        await fs.unlink(profile.path);
       } catch (error) {
-        console.error("Profile upload error:", error);
         return res.status(500).json({
           success: false,
-          message: "Error uploading profile picture",
+          message: "Error uploading profile picture: " + error.message,
         });
       }
     }
 
-    // Procesar imagen de portada
     if (req.files?.cover) {
       const cover = req.files.cover[0];
       try {
@@ -136,22 +136,27 @@ export const updateUserData = async (req, res) => {
           ],
         });
         updatedData.cover_photo = url;
-
-        await fs.unlink(cover.path);
       } catch (error) {
-        console.error("Cover upload error:", error);
         return res.status(500).json({
           success: false,
-          message: "Error uploading cover photo",
+          message: "Error uploading cover photo: " + error.message,
         });
       }
     }
 
-    // Actualizar usuario
+    updatedData.isPrivate = privacy;
+
     const user = await User.findByIdAndUpdate(userId, updatedData, {
       new: true,
       runValidators: true,
     });
+
+    if (!user) {
+      return res.status(500).json({
+        success: false,
+        message: "Error updating user",
+      });
+    }
 
     res.json({
       success: true,
@@ -159,7 +164,6 @@ export const updateUserData = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("updateUserData error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",

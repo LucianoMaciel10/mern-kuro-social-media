@@ -30,7 +30,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
         >
           <img
             src={user.profile_picture}
-            className={`absolute rounded-full z-2`}
+            className={`rounded-full w-full h-full object-cover`}
           />
         </div>
         <div className="w-full">
@@ -44,7 +44,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
                 >
                   {user.full_name}
                 </h1>
-                <Verified className="w-6 h-6 text-blue-500" />
+                {user.isVerified && <Verified className="w-6 h-6 text-blue-500" />}
               </div>
               <p
                 className={`${
@@ -98,8 +98,11 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
             </span>
           </div>
 
-          <div className={`flex items-center gap-6 mt-6 border-t pt-2 ${theme === 'dark' ? 'border-neutral-700' : 'border-neutral-200'}`}>
-            <div>
+          <div className={`flex flex-wrap items-center gap-6 mt-6 border-t pt-2 ${theme === 'dark' ? 'border-neutral-700' : 'border-neutral-200'}`}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-neutral-500">
+                Posts
+              </span>
               <span
                 className={`sm:text-xl font-bold ${
                   theme === "dark" ? "text-neutral-200" : "text-neutral-900"
@@ -107,11 +110,11 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
               >
                 {posts?.length}
               </span>
-              <span className="text-xs sm:text-sm ml-1.5 text-neutral-500">
-                Posts
-              </span>
             </div>
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-neutral-500">
+                Followers
+              </span>
               <span
                 className={`sm:text-xl font-bold ${
                   theme === "dark" ? "text-neutral-200" : "text-neutral-900"
@@ -119,20 +122,17 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
               >
                 {user.followers.length}
               </span>
-              <span className="text-xs sm:text-sm text-neutral-500 ml-1.5">
-                Followers
-              </span>
             </div>
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-neutral-500">
+                Following
+              </span>
               <span
                 className={`sm:text-xl font-bold ${
                   theme === "dark" ? "text-neutral-200" : "text-neutral-900"
                 }`}
               >
                 {user.following.length}
-              </span>
-              <span className="text-xs sm:text-sm text-neutral-500 ml-1.5">
-                Following
               </span>
             </div>
           </div>

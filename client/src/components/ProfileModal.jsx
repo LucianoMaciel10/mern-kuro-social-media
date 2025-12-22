@@ -17,35 +17,43 @@ const ProfileModal = ({ setShowEdit }) => {
     profile_picture: null,
     cover_photo: null,
     full_name: user.full_name,
+    privacy: user.isPrivate,
   });
   const dispatch = useDispatch();
   const { getToken } = useAuth();
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    try {
-      const userData = new FormData();
-      const {
-        full_name,
-        username,
-        bio,
-        location,
-        profile_picture,
-        cover_photo,
-      } = editForm;
-      userData.append("username", username);
-      userData.append("bio", bio);
-      userData.append("location", location);
-      userData.append("full_name", full_name);
-      if (profile_picture) userData.append("profile", profile_picture);
-      if (cover_photo) userData.append("cover", cover_photo);
 
-      const token = await getToken();
-      dispatch(updateUser({ userData, token }));
-      setShowEdit(false);
-    } catch (error) {
-      toast.error(error.message);
-    }
+    const userData = new FormData();
+    const { full_name, username, bio, location, profile_picture, cover_photo, privacy } = editForm;
+
+    userData.append("username", username);
+    userData.append("bio", bio);
+    userData.append("location", location);
+    userData.append("full_name", full_name);
+    userData.append('privacy', privacy);
+    if (profile_picture) userData.append("profile", profile_picture);
+    if (cover_photo) userData.append("cover", cover_photo);
+
+    toast.promise(
+      (async () => {
+        setShowEdit(false);
+        const token = await getToken();
+        const resultAction = dispatch(updateUser({ userData, token }));
+
+        if (updateUser.fulfilled.match(resultAction)) {
+          return resultAction.payload;
+        } else if (updateUser.rejected.match(resultAction)) {
+          throw new Error(resultAction.payload || "Error updating profile");
+        }
+      })(),
+      {
+        loading: "Saving profile...",
+        success: "Profile updated successfully",
+        error: (err) => err.message,
+      }
+    );
   };
 
   return (
@@ -82,12 +90,7 @@ const ProfileModal = ({ setShowEdit }) => {
           >
             Edit Profile
           </h1>
-          <form
-            className="space-y-4"
-            onSubmit={(e) =>
-              toast.promise(handleSaveProfile(e), { loading: "Saving..." })
-            }
-          >
+          <form className="space-y-4" onSubmit={handleSaveProfile}>
             <div className="flex flex-col gap-1">
               <p
                 className={`text-sm font-medium ${
@@ -290,7 +293,10 @@ const ProfileModal = ({ setShowEdit }) => {
                 <select
                   id="toggle-privacy"
                   value={isPrivate ? "private" : "public"}
-                  onChange={(e) => setIsPrivate(e.target.value === "private")}
+                  onChange={(e) => {
+                    setIsPrivate(e.target.value === "private")
+                    setEditForm({...editForm, privacy: e.target.value === "private"})
+                  }}
                   className={`px-4 py-2 border rounded-lg cursor-pointer ${
                     theme === "dark"
                       ? "border-neutral-600"
