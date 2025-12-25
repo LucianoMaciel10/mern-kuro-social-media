@@ -1,40 +1,40 @@
 import { useTheme } from "next-themes";
-import PostCard from "./PostCard";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import moment from "moment";
-import { SendHorizonal, X } from "lucide-react";
+import {
+  BadgeCheck,
+  MessageCircle,
+  SendHorizonal,
+  Share2,
+  X,
+} from "lucide-react";
 import Comment from "./Comment";
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
+import HeartComponent from "./HeartComponent";
+import toast from "react-hot-toast";
 
 const PostModal = ({
   post,
   setShowModal,
-  onCommentAdded,
-  onLikeUpdate,
-  currentUser,
+  handleCommentUpdate,
+  handleLike,
+  user,
 }) => {
   const [isLoadingComment, setIsLoadingComment] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
-  const [likes, setLikes] = useState(post.likes || []);
+  const [showBottomFade, setShowBottomFade] = useState(false);
+  const [showTopFade, setShowTopFade] = useState(false);
+  const scrollContainerRef = useRef(null);
   const { theme } = useTheme();
   const mediaQuery330 = useMediaQuery(330);
   const mediaQuery640 = useMediaQuery(640);
   const mediaQuery1750 = useMediaQuery(1750);
   const { getToken } = useAuth();
-
-  useEffect(() => {
-    setLikes(post.likes || []);
-  }, [post.likes]);
-
-  const handleLikeChange = (newLikes) => {
-    setLikes(newLikes);
-    onLikeUpdate?.(newLikes);
-  };
+  const navigate = useNavigate();
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -42,6 +42,64 @@ const PostModal = ({
       theme === "dark" ? "text-blue-500" : "text-blue-600"
     }">$1</span>`
   );
+
+  const getMaskGradient = () => {
+    if (!showBottomFade && !showTopFade) return "none";
+    
+    if (showBottomFade && showTopFade) {
+      return "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)";
+    }
+    if (showTopFade) {
+      return "linear-gradient(to bottom, transparent 0%, black 5%, black 100%)";
+    }
+    return "linear-gradient(to bottom, black 0%, black 95%, transparent 100%)";
+  };
+
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollHeight, clientHeight, scrollTop } = scrollContainerRef.current;
+      const hasScroll = scrollHeight > clientHeight;
+      const isAtBottom = scrollTop >= scrollHeight - clientHeight - 10;
+      const isAtTop = scrollTop <= 5;
+      
+      setShowBottomFade(hasScroll && !isAtBottom);
+      setShowTopFade(hasScroll && !isAtTop);
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Ejecutar checkScroll inmediatamente
+    checkScroll();
+
+    // Ejecutar de nuevo después de un pequeño delay para asegurar que el DOM se actualizó
+    const timer = setTimeout(() => {
+      checkScroll();
+    }, 100);
+
+    // Detectar cambios en el DOM del contenedor
+    const observer = new MutationObserver(() => {
+      checkScroll();
+    });
+
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    container.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+      container.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [comments]);
 
   const handleSendComment = async (commentText, postId) => {
     try {
@@ -53,8 +111,8 @@ const PostModal = ({
       setIsLoadingComment(true);
       const token = await getToken();
 
-      const { data } = await axios.post(
-        `${API_URL}/api/comments/create`,
+      const { data } = await api.post(
+        "/api/comments/create",
         {
           content: commentText.trim(),
           postId,
@@ -65,18 +123,18 @@ const PostModal = ({
       );
 
       if (data.success) {
+        toast.success(data.message);
         setComments([...comments, data.data._id]);
         setComment("");
-        onCommentAdded?.({
+        handleCommentUpdate?.({
           ...post,
           comments: [...post.comments, data.data._id],
         });
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      console.error(
-        "Error posting comment:",
-        error.response?.data?.message || error.message
-      );
+      toast.error(error.message);
     } finally {
       setIsLoadingComment(false);
     }
@@ -89,7 +147,14 @@ const PostModal = ({
         mediaQuery1750 && "px-160!"
       }`}
     >
-      <div className="max-h-[70vh] min-w-full relative overflow-y-scroll no-scrollbar rounded-lg">
+      <div
+        ref={scrollContainerRef}
+        style={{
+          maskImage: getMaskGradient(),
+          WebkitMaskImage: getMaskGradient(),
+        }}
+        className={`max-h-[70vh] min-w-full relative overflow-y-scroll no-scrollbar rounded-lg`}
+      >
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -108,13 +173,85 @@ const PostModal = ({
                 : "bg-white"
             }`}
           >
-            <PostCard
-              withShadow={false}
-              post={{ ...post, likes }}
-              noReRender={true}
-              currentUser={currentUser}
-              onLikeUpdate={handleLikeChange}
-            />
+            <div
+              className={`rounded-xl p-4 space-y-4 w-full 
+                ${
+                  theme === "dark"
+                    ? "bg-neutral-900 shadow-neutral-800"
+                    : "bg-white"
+                }
+              `}
+            >
+              <div className="inline-flex items-center gap-3">
+                <img
+                  onClick={() => navigate(`/profile/${post.user._id}`)}
+                  src={post.user.profile_picture}
+                  className="w-10 h-10 rounded-full shadow cursor-pointer"
+                />
+                <div>
+                  <div className="flex items-center space-x-1">
+                    <span
+                      onClick={() => navigate(`/profile/${post.user._id}`)}
+                      className="cursor-pointer"
+                    >
+                      {post.user.full_name}
+                    </span>
+                    <BadgeCheck className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    @{post.user.username} • {moment(post.createdAt).fromNow()}
+                  </div>
+                </div>
+              </div>
+              {post.content && (
+                <div
+                  className={`${
+                    theme === "dark" ? "text-neutral-200" : "text-gray-800"
+                  } text-sm whitespace-pre-line`}
+                  dangerouslySetInnerHTML={{ __html: postWithHashtags }}
+                />
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                {post.image_urls.map((image, index) => (
+                  <img
+                    src={image}
+                    key={index}
+                    className={`w-full h-48 object-cover rounded-lg ${
+                      post.image_urls.length === 1 && "col-span-2 h-auto"
+                    }`}
+                  />
+                ))}
+              </div>
+              <div
+                className={`flex items-center gap-4 text-sm pt-2 border-t ${
+                  theme === "dark"
+                    ? "border-neutral-600 text-neutral-400"
+                    : "border-neutral-300 text-neutral-600"
+                }`}
+              >
+                <div className="flex items-center gap-1">
+                  <HeartComponent
+                    userId={user?._id}
+                    likes={post.likes || []}
+                    handleLike={handleLike}
+                  />
+                  <span>{post.likes?.length || 0}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MessageCircle
+                    onClick={() =>
+                      document.getElementById("input-post-comment").focus()
+                    }
+                    className="w-5 h-5 cursor-pointer"
+                  />
+                  <span>{post.comments.length}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Share2 className="w-5 h-5 cursor-pointer" />
+                  <span>{0}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         <div
@@ -159,7 +296,7 @@ const PostModal = ({
           )}
           <div
             className={`flex items-center justify-between gap-4 p-2 rounded-lg ${
-              theme === "dark" ? "bg-neutral-800" : "bg-neutral-100"
+              theme === "dark" ? "bg-neutral-800" : "bg-neutral-200/80"
             }`}
           >
             <input
@@ -173,8 +310,8 @@ const PostModal = ({
               disabled={isLoadingComment}
               onChange={(e) => setComment(e.target.value)}
               value={comment}
-              className={`rounded-full border outline-none w-full px-4 py-1 ${
-                theme === "dark" ? "border-neutral-600" : "border-neutral-400"
+              className={`rounded-full border-2 outline-none w-full px-4 py-1 ${
+                theme === "dark" ? "border-neutral-600 focus:border-neutral-400/80" : "border-neutral-400 focus:border-neutral-600"
               }`}
               placeholder="Send a comment"
             />
@@ -183,8 +320,8 @@ const PostModal = ({
               onClick={() => handleSendComment(comment, post._id)}
               className={`disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center rounded-full p-2 ${
                 theme === "dark"
-                  ? "bg-neutral-700 cursor-pointer hover:bg-neutral-600/85"
-                  : "bg-neutral-200 cursor-pointer hover:bg-neutral-300/80"
+                  ? "bg-neutral-600 cursor-pointer hover:bg-neutral-500/80 disabled:hover:bg-neutral-600"
+                  : "bg-neutral-300 cursor-pointer hover:bg-neutral-400/50 disabled:hover:bg-neutral-300"
               }`}
             >
               <SendHorizonal

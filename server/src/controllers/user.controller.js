@@ -293,3 +293,29 @@ export const getUserProfiles = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const getUserLikedPosts = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: No user ID found",
+      });
+    }
+
+    const likedPosts = await Post.find({ likes: userId })
+      .populate("user")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      posts: likedPosts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};

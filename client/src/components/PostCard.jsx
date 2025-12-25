@@ -1,24 +1,26 @@
 import { BadgeCheck, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PostModal from "./PostModal";
 import HeartComponent from "./HeartComponent";
 import { useSelector } from "react-redux";
+import api from "../api/axios";
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
 
 const PostCard = ({
   post,
-  withShadow,
-  handlePostUpdate,
-  onLikeUpdate,
-  noReRender = false,
+  handleLikeUpdate,
+  handleCommentUpdate,
 }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [likes, setLikes] = useState(post.likes || []);
   const [showModal, setShowModal] = useState(false);
-  const user = useSelector((state) => state.user.value)
+  const user = useSelector((state) => state.user.value);
+  const { getToken } = useAuth();
 
   const postWithHashtags = post.content.replace(
     /(#\w+)/g,
@@ -27,34 +29,46 @@ const PostCard = ({
     }">$1</span>`
   );
 
-  useEffect(() => {
-    setLikes(post.likes || []);
-  }, [post.likes]);
+  const handleLike = async () => {
+    try {
+      const { data } = await api.post(
+        "/api/posts/like",
+        { postId: post._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
 
-  const handleLikeChange = (newLikes) => {
-    setLikes(newLikes);
-    if (noReRender) {
-      onLikeUpdate?.(newLikes);
-    } else {
-      onLikeUpdate?.(post._id, newLikes);
+      if (data.success) {
+        handleLikeUpdate()
+        toast.success(data.message);
+        setLikes((prev) => {
+          if (prev.includes(user._id)) {
+            return prev.filter((id) => id !== user._id);
+          } else {
+            return [...prev, user._id];
+          }
+        });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
   return (
     <div
-      className={`rounded-xl p-4 space-y-4 w-full ${
+      className={`rounded-xl p-4 space-y-4 w-full shadow ${
         theme === "dark"
-          ? `bg-neutral-900 shadow-neutral-800 ${withShadow && "shadow-md"}`
+          ? "bg-neutral-900 shadow-neutral-800 shadow-md"
           : "bg-white"
       }
-      ${withShadow && "shadow"}
     `}
     >
       <div className="inline-flex items-center gap-3">
         <img
           onClick={() => navigate(`/profile/${post.user._id}`)}
           src={post.user.profile_picture}
-          className="w-10 h-10 rounded-full shadow cursor-pointer"
+          className="size-10 rounded-full shadow cursor-pointer"
         />
         <div>
           <div className="flex items-center space-x-1">
@@ -99,20 +113,15 @@ const PostCard = ({
       >
         <div className="flex items-center gap-1">
           <HeartComponent
-            userId={user?._id}
+            userId={user?._id}  
             likes={likes || []}
-            postId={post._id}
-            setLikes={handleLikeChange}
+            handleLike={handleLike}
           />
           <span>{likes?.length || 0}</span>
         </div>
         <div className="flex items-center gap-1">
           <MessageCircle
-            onClick={() =>
-              !noReRender
-                ? setShowModal(true)
-                : document.getElementById("input-post-comment").focus()
-            }
+            onClick={() => setShowModal(true)}
             className="w-5 h-5 cursor-pointer"
           />
           <span>{post.comments.length}</span>
@@ -125,9 +134,9 @@ const PostCard = ({
       {showModal && (
         <PostModal
           post={{ ...post, likes }}
-          currentUser={user}
-          onCommentAdded={handlePostUpdate}
-          onLikeUpdate={handleLikeChange}
+          user={user}
+          handleCommentUpdate={handleCommentUpdate}
+          handleLike={handleLike}
           setShowModal={setShowModal}
         />
       )}

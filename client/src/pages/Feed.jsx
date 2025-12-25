@@ -19,14 +19,12 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const mediaQuery640 = useMediaQuery(640);
 
-  const handlePostUpdate = (updatedPost) => {
+  const handleCommentUpdate = (updatedPost) => {
     setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
   };
 
   const handleLikeUpdate = (postId, updatedLikes) => {
-    setPosts(
-      posts.map((p) => (p._id === postId ? { ...p, likes: updatedLikes } : p))
-    );
+    setPosts(posts.map((p) => (p._id === postId ? { ...p, likes: updatedLikes } : p)));
   };
 
   useEffect(() => {
@@ -93,11 +91,10 @@ const Feed = () => {
         <div className="space-y-6">
           {posts.map((post) => (
             <PostCard
-              handlePostUpdate={handlePostUpdate}
-              onLikeUpdate={handleLikeUpdate}
+              handleCommentUpdate={handleCommentUpdate}
+              handleLikeUpdate={handleLikeUpdate}
               key={post._id}
               post={post}
-              withShadow={true}
             />
           ))}
         </div>

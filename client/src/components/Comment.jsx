@@ -69,7 +69,7 @@ const Comment = ({ commentId }) => {
         <img
           onClick={() => navigate(`/profile/${currentComment.author._id}`)}
           src={currentComment.author.profile_picture}
-          className="w-10 rounded-full cursor-pointer"
+          className="size-8 object-cover rounded-full cursor-pointer"
         />
         <p
           onClick={() => navigate(`/profile/${currentComment.author._id}`)}

@@ -1,39 +1,6 @@
-import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
 import { Heart } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-
-const HeartComponent = ({ likes, userId, setLikes, postId }) => {
-  const { getToken } = useAuth();
-
-  const handleLike = async () => {
-    try {
-      const token = await getToken();
-
-      const { data } = await axios.post(
-        `${API_URL}/api/posts/like`,
-        { postId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (data.success) {
-        let newLikes;
-        if (likes.includes(userId)) {
-          newLikes = likes.filter((id) => id !== userId);
-        } else {
-          newLikes = [...likes, userId];
-        }
-        
-        setLikes(newLikes);
-      }
-    } catch (error) {
-      console.error("Error liking post:", error);
-    }
-  };
-
+const HeartComponent = ({ likes, userId, handleLike }) => {
   return (
     <Heart
       onClick={handleLike}

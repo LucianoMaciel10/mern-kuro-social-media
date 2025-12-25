@@ -25,16 +25,37 @@ const Profile = () => {
   const mediaQuery1536 = useMediaQuery(1536);
   const mediaQuery768 = useMediaQuery(768);
 
-  const fetchUser = async (profileId) => {
+  const handleCommentUpdate = (updatedPost) => {
+    setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
+  };
+
+  const handleLikeUpdate = (postId, updatedLikes) => {
+    setPosts(
+      posts.map((p) => (p._id === postId ? { ...p, likes: updatedLikes } : p))
+    );
+  };
+
+  const fetchData = async () => {
     const token = await getToken();
     try {
-      const { data } = await api.post(
-        "/api/user/profiles",
-        { profileId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      let data;
+
+      if (activeTab === "likes") {
+        const response = await api.get("/api/user/liked-posts", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        data = response.data;
+      } else {
+        const response = await api.post(
+          "/api/user/profiles",
+          { profileId: profileId || currentUser._id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        data = response.data;
+      }
+
       if (data.success) {
-        setUser(data.profile);
+        setUser(data.profile || user);
         setPosts(data.posts);
       } else {
         toast.error(data.message);
@@ -45,12 +66,10 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (profileId) {
-      fetchUser(profileId);
-    } else {
-      fetchUser(currentUser._id);
+    if (profileId || currentUser) {
+      fetchData();
     }
-  }, [profileId, currentUser]);
+  }, [profileId, currentUser, activeTab]);
 
   return user ? (
     <div
@@ -117,9 +136,10 @@ const Profile = () => {
             <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
               {posts.map((post) => (
                 <PostCard
+                  handleCommentUpdate={handleCommentUpdate}
+                  handleLikeUpdate={handleLikeUpdate}
                   post={post}
                   key={post._id}
-                  withShadow={true}
                 />
               ))}
             </div>
@@ -158,7 +178,7 @@ const Profile = () => {
                           <img
                             src={image}
                             key={index}
-                            className=" aspect-video object-cover"
+                            className="aspect-video object-cover"
                           />
                           <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
                             Posted {moment(post.createdAt).fromNow()}
@@ -170,9 +190,19 @@ const Profile = () => {
               </div>
             </div>
           )}
-          {/* {activeTab === "likes" && (
-            Buscar entre todos los posts, los que tengan los ID que aparecen en la propiedad user.posts_liked y mostrarlos
-          )} */}
+
+          {activeTab === "likes" && posts && posts.length > 0 && (
+            <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
+              {posts.map((post) => (
+                <PostCard
+                  handleCommentUpdate={handleCommentUpdate}
+                  handleLikeUpdate={handleLikeUpdate}
+                  post={post}
+                  key={post._id}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {showEdit && <ProfileModal setShowEdit={setShowEdit} />}
