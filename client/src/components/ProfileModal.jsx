@@ -7,9 +7,9 @@ import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 
 const ProfileModal = ({ setShowEdit }) => {
-  const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
   const user = useSelector((state) => state.user.value);
+  const [isPrivate, setIsPrivate] = useState(user.isPrivate);
   const [editForm, setEditForm] = useState({
     username: user.username,
     bio: user.bio,

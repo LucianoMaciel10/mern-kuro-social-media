@@ -3,15 +3,106 @@ import { useTheme } from "next-themes";
 import { ImagePlus, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
   const user = useSelector((state) => state.user.value);
+  const { getToken } = useAuth();
 
-  const handleSubmit = async () => {};
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      // Si pesa menos de 150KB, no comprimir
+      if (file.size < 150 * 1024) {
+        resolve(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > 1280) {
+            height = (height * 1280) / width;
+            width = 1280;
+          } else if (height > 1280) {
+            width = (width * 1280) / height;
+            height = 1280;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              const filename = `compressed-${Date.now()}.webp`;
+              const file = new File([blob], filename, {
+                type: "image/webp",
+                lastModified: Date.now(),
+              });
+              resolve(file);
+            },
+            "image/webp",
+            0.75
+          );
+        };
+      };
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!images.length && !content)
+      return toast.error("Please add at least one image or text");
+
+    setLoading(true);
+
+    const postType =
+      images.length && content
+        ? "text_with_image"
+        : images.length
+        ? "image"
+        : "text";
+
+    try {
+      const compressedImages = await Promise.all(
+        images.map((img) => compressImage(img))
+      );
+
+      const formData = new FormData();
+      formData.append("content", content);
+      formData.append("post_type", postType);
+
+      compressedImages.forEach((compImg) => {
+        formData.append("images", compImg, compImg.name);
+      });
+
+      const { data } = await api.post("/api/posts/add", formData, {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+
+      if (data.success) {
+        navigate("/");
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex justify-center">
@@ -79,7 +170,11 @@ const CreatePost = () => {
             </div>
           )}
 
-          <div className={`flex items-center justify-between pt-3 border-t ${theme === 'dark' ? 'border-neutral-500' : 'border-neutral-300'}`}>
+          <div
+            className={`flex items-center justify-between pt-3 border-t ${
+              theme === "dark" ? "border-neutral-500" : "border-neutral-300"
+            }`}
+          >
             <label
               htmlFor="images"
               className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 transition cursor-pointer"

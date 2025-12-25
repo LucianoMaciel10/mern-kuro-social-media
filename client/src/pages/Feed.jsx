@@ -9,9 +9,8 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { dark } from "@clerk/themes";
 import { useAuth, UserButton } from "@clerk/clerk-react";
 import { Moon, Sun } from "lucide-react";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import toast from "react-hot-toast";
+import api from "../api/axios";
 
 const Feed = () => {
   const { getToken } = useAuth();
@@ -34,15 +33,14 @@ const Feed = () => {
     const fetchPosts = async () => {
       try {
         const token = await getToken();
-        const res = await axios.get(`${API_URL}/api/posts/feed`, {
+        const { data } = await api.get("/api/posts/feed", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setPosts(res.data.posts);
+        setPosts(data.posts);
       } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
+        toast.error(error.message);
       }
+      setLoading(false);
     };
 
     fetchPosts();
