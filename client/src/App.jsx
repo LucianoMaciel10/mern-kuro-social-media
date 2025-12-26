@@ -13,8 +13,10 @@ import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./features/user/userSlice";
+import { useTheme } from "next-themes";
 
 function App() {
+  const { theme } = useTheme();
   const { user } = useUser();
   const { getToken } = useAuth();
 
@@ -32,7 +34,37 @@ function App() {
 
   return (
     <>
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          style: {
+            background: theme === "dark" ? "#171717" : "#ffffff",
+            color: theme === "dark" ? "#f5f5f5" : "#000000",
+            borderRadius: "8px",
+            boxShadow:
+              theme === "dark"
+                ? "0 4px 12px rgba(0, 0, 0, 0.5)"
+                : "0 4px 12px rgba(0, 0, 0, 0.1)",
+          },
+          success: {
+            style: {
+              background: theme === "dark" ? "#10b981" : "#d1fae5",
+              color: theme === "dark" ? "#ffffff" : "#047857",
+            },
+          },
+          error: {
+            style: {
+              background: theme === "dark" ? "#ef4444" : "#fee2e2",
+              color: theme === "dark" ? "#ffffff" : "#dc2626",
+            },
+          },
+          loading: {
+            style: {
+              background: theme === "dark" ? "#3b82f6" : "#dbeafe",
+              color: theme === "dark" ? "#ffffff" : "#1e40af",
+            },
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={!user ? <Login /> : <Layout />}>
           <Route index element={<Feed />} />

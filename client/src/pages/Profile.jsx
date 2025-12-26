@@ -20,13 +20,18 @@ const Profile = () => {
   const { profileId } = useParams();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [showEdit, setShowEdit] = useState(false);
   const mediaQuery1536 = useMediaQuery(1536);
   const mediaQuery768 = useMediaQuery(768);
+  const mediaQuery1280 = useMediaQuery(1280);
 
   const handleCommentUpdate = (updatedPost) => {
     setPosts(posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
+    setLikedPosts(
+      likedPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+    );
   };
 
   const handleLikeUpdate = (postId, updatedLikes) => {
@@ -45,6 +50,9 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         data = response.data;
+        if (data.success) {
+          setLikedPosts(data.posts);
+        }
       } else {
         const response = await api.post(
           "/api/user/profiles",
@@ -52,12 +60,13 @@ const Profile = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         data = response.data;
+        if (data.success) {
+          setUser(data.profile || user);
+          setPosts(data.posts);
+        }
       }
 
-      if (data.success) {
-        setUser(data.profile || user);
-        setPosts(data.posts);
-      } else {
+      if (!data.success) {
         toast.error(data.message);
       }
     } catch (error) {
@@ -148,12 +157,14 @@ const Profile = () => {
           {activeTab === "media" && posts && posts.length > 0 && (
             <div className="pb-27 sm:pb-6 flex justify-center">
               <div
-                className={`w-fit grid gap-6 justify-items-center p-6 mt-6 rounded-lg shadow ${
+                className={`w-full grid gap-6 p-6 mt-6 rounded-lg shadow ${
                   mediaQuery1536
+                    ? "grid-cols-4"
+                    : mediaQuery1280
                     ? "grid-cols-3"
-                    : !mediaQuery768
-                    ? "grid-cols-1"
-                    : "grid-cols-2"
+                    : mediaQuery768
+                    ? "grid-cols-2"
+                    : "grid-cols-1"
                 }
                 ${
                   theme === "dark"
@@ -164,36 +175,33 @@ const Profile = () => {
               >
                 {posts
                   .filter((post) => post.image_urls.length > 0)
-                  .map((post) => (
-                    <>
-                      {post.image_urls.map((image, index) => (
-                        <Link
-                          to={image}
-                          target="_blank"
-                          key={index}
-                          className={`w-64 relative group rounded-lg cursor-pointer overflow-hidden shadow-md hover:shadow-lg ${
-                            theme === "dark" && "shadow-neutral-800"
-                          }`}
-                        >
-                          <img
-                            src={image}
-                            key={index}
-                            className="aspect-video object-cover"
-                          />
-                          <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
-                            Posted {moment(post.createdAt).fromNow()}
-                          </p>
-                        </Link>
-                      ))}
-                    </>
-                  ))}
+                  .flatMap((post) =>
+                    post.image_urls.map((image, index) => (
+                      <Link
+                        to={image}
+                        target="_blank"
+                        key={`${post._id}-${index}`}
+                        className={`w-full relative group rounded-lg cursor-pointer overflow-hidden shadow-md hover:shadow-lg ${
+                          theme === "dark" && "shadow-neutral-800"
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          className="w-full aspect-video object-cover"
+                        />
+                        <p className="absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300">
+                          Posted {moment(post.createdAt).fromNow()}
+                        </p>
+                      </Link>
+                    ))
+                  )}
               </div>
             </div>
           )}
 
-          {activeTab === "likes" && posts && posts.length > 0 && (
+          {activeTab === "likes" && likedPosts && likedPosts.length > 0 && (
             <div className="flex flex-col items-center gap-6 mt-6 pb-27 sm:pb-6">
-              {posts.map((post) => (
+              {likedPosts.map((post) => (
                 <PostCard
                   handleCommentUpdate={handleCommentUpdate}
                   handleLikeUpdate={handleLikeUpdate}

@@ -1,29 +1,31 @@
 import multer from "multer";
 import path from "path";
 
-// Usar memory storage en lugar de disk storage
 const storage = multer.memoryStorage();
 
-// Filtro de archivos (solo imágenes)
 const fileFilter = (req, file, cb) => {
-  const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-  const allowedExts = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+  const allowedImageMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const allowedVideoMimes = ["video/mp4", "video/quicktime", "video/webm"];
+  const allowedImageExts = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+  const allowedVideoExts = [".mp4", ".mov", ".webm"];
 
   const ext = path.extname(file.originalname).toLowerCase();
   const mime = file.mimetype;
 
-  if (allowedMimes.includes(mime) && allowedExts.includes(ext)) {
+  const isAllowedImage = allowedImageMimes.includes(mime) && allowedImageExts.includes(ext);
+  const isAllowedVideo = allowedVideoMimes.includes(mime) && allowedVideoExts.includes(ext);
+
+  if (isAllowedImage || isAllowedVideo) {
     cb(null, true);
   } else {
-    cb(new Error("Only image files are allowed (jpg, png, webp, gif)"));
+    cb(new Error("Only image and video files are allowed"));
   }
 };
 
-// Configuración de multer
 export const upload = multer({
-  storage, // ✅ memory storage, no disk
+  storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB máximo
+    fileSize: 50 * 1024 * 1024, // 50MB para soportar videos
   },
 });

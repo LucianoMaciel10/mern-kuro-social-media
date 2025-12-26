@@ -4,9 +4,21 @@ import User from "../models/User.js";
 
 export const addUserStory = async (req, res) => {
   try {
-    const { userId } = await req.auth();
+    console.log("📥 Story creation started");
+
+    const authResult = await req.auth();
+    if (!authResult?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const { userId } = authResult;
     const { content, media_type, background_color } = req.body;
     const media = req.file;
+
+    console.log("✅ Auth passed, userId:", userId);
 
     if (!media_type) {
       return res.status(400).json({
@@ -18,26 +30,27 @@ export const addUserStory = async (req, res) => {
     if (media_type !== "text" && !media) {
       return res.status(400).json({
         success: false,
-        message: "Media file is required for image or video",
+        message: "Media file is required",
       });
     }
 
     let media_url = "";
 
-    if (media_type === "image" || media_type === "video") {
+    if ((media_type === "image" || media_type === "video") && media) {
       try {
+        console.log("📤 Uploading to ImageKit");
         const response = await imagekit.upload({
           file: media.buffer,
           fileName: `story-${userId}-${Date.now()}`,
           folder: "/stories",
         });
-
-        media_urls = response.url;
+        media_url = response.url;
+        console.log("✅ Upload successful");
       } catch (error) {
-        console.error("ImageKit upload error:", error);
+        console.error("❌ ImageKit error:", error.message);
         return res.status(500).json({
           success: false,
-          message: "Failed to upload media",
+          message: "Failed to upload media: " + error.message,
         });
       }
     }
@@ -50,10 +63,14 @@ export const addUserStory = async (req, res) => {
       background_color: background_color || "#000000",
     });
 
-    res.json({ success: true, data: story });
+    console.log("✅ Story created:", story._id);
+    res.status(200).json({ success: true, data: story });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("❌ General error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
   }
 };
 
